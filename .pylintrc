@@ -1,0 +1,233 @@
+[MASTER]
+
+# 启用哪些检查
+enable=all
+
+# 禁用哪些检查
+disable=
+    # 暂时禁用的检查
+    missing-docstring,
+    too-many-arguments,
+    too-many-locals,
+    too-many-statements,
+    too-many-branches,
+    too-many-instance-attributes,
+    too-few-public-methods,
+    protected-access,
+    duplicate-code,
+    # 与black冲突的格式检查
+    bad-continuation,
+    wrong-import-position,
+    # 其他
+    fixme,
+    broad-except,
+    redefined-outer-name,
+    unused-argument
+
+# 评分选项
+fail-under=8.0
+confidence=HIGH
+
+# 消息控制
+max-line-length=88
+indent-string='    '
+
+[MESSAGES CONTROL]
+
+# 启用特定消息
+enable=
+    # 代码质量
+    undefined-variable,
+    unused-import,
+    unused-variable,
+    unused-wildcard-import,
+    # 命名约定
+    invalid-name,
+    # 导入
+    wrong-import-order,
+    # 异常处理
+    bare-except,
+    # 类型检查
+    no-member,
+    # 其他
+    duplicate-key,
+    eval-used,
+    exec-used,
+    global-statement,
+    bad-builtin,
+    apply-builtin,
+    filter-builtin-not-iterating,
+    map-builtin-not-iterating,
+    zip-builtin-not-iterating,
+    range-builtin-not-iterating,
+    # 字符串
+    anomalous-backslash-in-string,
+    bad-open-mode,
+    # 类
+    abstract-method,
+    access-member-before-definition,
+    # 函数
+    not-callable,
+    # 模块
+    deprecated-module,
+    # 其他
+    super-with-arguments,
+    raising-string,
+    # 格式
+    trailing-whitespace,
+    mixed-indentation,
+    unexpected-line-ending-format,
+    bad-indentation,
+    missing-final-newline,
+    trailing-newlines
+
+[REPORTS]
+
+# 输出格式
+output-format=text
+reports=no
+score=yes
+
+[REFACTORING]
+
+# 重构建议
+max-nested-blocks=5
+max-returns=6
+max-branches=12
+max-statements=50
+max-args=5
+max-locals=15
+max-attributes=7
+
+[FORMAT]
+
+# 格式选项
+max-line-length=88
+ignore-long-lines=^\s*(# )?<?https?://\S+>?$
+single-line-if-stmt=no
+no-space-check=trailing-comma,dict-separator
+max-module-lines=1000
+indent-after-paren=4
+expect-indentation-in=4
+indent-string='    '
+
+[BASIC]
+
+# 命名约定
+# 函数名: snake_case
+function-naming-style=snake_case
+# 变量名: snake_case
+variable-naming-style=snake_case
+# 类名: PascalCase
+class-naming-style=PascalCase
+# 常量名: UPPER_CASE
+const-naming-style=UPPER_CASE
+# 方法名: snake_case
+method-naming-style=snake_case
+# 模块名: snake_case
+module-naming-style=snake_case
+
+# 好的变量名模式
+good-names=
+    i,
+    j,
+    k,
+    ex,
+    Run,
+    _,
+    df,
+    idx,
+    fig,
+    ax,
+    plt,
+    np,
+    pd,
+    logger
+
+# 不好的变量名模式
+bad-names=
+    foo,
+    bar,
+    baz,
+    toto,
+    tutu,
+    tata
+
+# 导入检查
+# 导入模块应该按以下顺序分组：
+# 1. 标准库导入
+# 2. 相关第三方导入
+# 3. 本地应用/库特定导入
+import-groups=
+    future,
+    standard,
+    third,
+    first
+
+[TYPECHECK]
+
+# 类型检查选项
+ignored-modules=
+    numpy,
+    pandas,
+    matplotlib,
+    sklearn,
+    tensorflow,
+    torch,
+    django,
+    flask,
+    sqlalchemy
+
+ignored-classes=
+    optparse.Values,
+    thread._local,
+    _thread._local
+
+[SIMILARITIES]
+
+# 代码相似性检查
+min-similarity-lines=4
+ignore-comments=yes
+ignore-docstrings=yes
+ignore-imports=no
+
+[MISCELLANEOUS]
+
+# 其他选项
+notes=FIXME,XXX,TODO
+symbols=no
+
+[VARIABLES]
+
+# 变量检查
+dummy-variables-rgx=_+$|(_[a-zA-Z0-9_]*[a-zA-Z0-9]+?$)|dummy|^ignored_|^unused_
+init-import=no
+callbacks=cb_,_cb
+
+[CLASSES]
+
+# 类检查
+defining-attr-methods=__init__,__new__,setUp
+valid-classmethod-first-arg=cls
+valid-metaclass-classmethod-first-arg=mcs
+
+[DESIGN]
+
+# 设计检查
+max-args=5
+max-locals=15
+max-returns=6
+max-branches=12
+max-statements=50
+max-parents=7
+max-attributes=7
+min-public-methods=1
+
+[EXCEPTIONS]
+
+# 异常检查
+overgeneral-exceptions=Exception
+ignored-modules=
+    numpy,
+    pandas,
+    matplotlib
