@@ -32,7 +32,7 @@ class AutoGitSync:
             "auto_commit": True,
             "auto_push": True,
             "commit_message_template": "auto: {timestamp} - {change_count} files changed",
-            "check_interval_minutes": 30,
+            "schedule": "10 0,12 * * *",  # 每日00:10和12:10
             "last_check_time": None,
             "last_commit_hash": None,
             "exclude_patterns": [
@@ -224,12 +224,12 @@ class AutoGitSync:
         """设置定时任务"""
         print(f"\n⏰ 设置定时同步任务...")
         
-        # 创建cron任务配置
+        # 创建cron任务配置 - 改为每日两次：00:10和12:10
         cron_config = {
             "name": "GitHub自动同步",
-            "schedule": f"*/{self.config['check_interval_minutes']} * * * *",
+            "schedule": "10 0,12 * * *",
             "command": f"cd {self.workspace_dir} && python3 scripts/auto_git_sync.py --check",
-            "description": f"每{self.config['check_interval_minutes']}分钟自动同步代码到GitHub"
+            "description": "每日00:10和12:10自动同步代码到GitHub"
         }
         
         cron_file = os.path.join(self.workspace_dir, ".github_auto_sync_cron.json")
@@ -303,7 +303,7 @@ cd {self.workspace_dir} && python3 scripts/auto_git_sync.py --check
         print(f"   工作分支: {self.config.get('branch', 'develop')}")
         print(f"   自动提交: {'✅ 启用' if self.config.get('auto_commit') else '❌ 禁用'}")
         print(f"   自动推送: {'✅ 启用' if self.config.get('auto_push') else '❌ 禁用'}")
-        print(f"   检查间隔: {self.config.get('check_interval_minutes', 30)}分钟")
+        print(f"   同步时间: {self.config.get('schedule', '10 0,12 * * *')} (每日00:10和12:10)")
         
         if self.config.get('last_check_time'):
             print(f"   最后检查: {self.config['last_check_time']}")
