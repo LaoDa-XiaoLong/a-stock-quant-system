@@ -1,0 +1,25 @@
+{
+  "description": "财报数据结构定义",
+  "tables": {
+    "financial_reports": {
+      "description": "财报数据表",
+      "columns": {
+        "stock_code": {"type": "string", "description": "股票代码", "example": "000001.SZ"},
+        "stock_name": {"type": "string", "description": "股票名称", "example": "平安银行"},
+        "report_type": {"type": "string", "description": "报告类型", "example": "年报、季报、业绩预告"},
+        "report_date": {"type": "date", "description": "报告日期", "example": "2026-03-27"},
+        "publish_date": {"type": "date", "description": "发布日期", "example": "2026-03-27"},
+        "revenue_actual": {"type": "decimal", "description": "实际营收", "example": "1000000000.00"},
+        "revenue_expected": {"type": "decimal", "description": "预期营收", "example": "900000000.00"},
+        "revenue_deviation": {"type": "decimal", "description": "营收偏差百分比", "example": "11.11"},
+        "profit_actual": {"type": "decimal", "description": "实际净利润", "example": "100000000.00"},
+        "profit_expected": {"type": "decimal", "description": "预期净利润", "example": "80000000.00"},
+        "profit_deviation": {"type": "decimal", "description": "净利润偏差百分比", "example": "25.00"},
+        "data_quality_score": {"type": "integer", "description": "数据质量评分", "example": "85"},
+        "created_at": {"type": "datetime", "description": "创建时间", "example": "2026-03-27 10:00:00"}
+      },
+      "indexes": ["stock_code", "report_date", "report_type"],
+      "constraints": ["PRIMARY KEY (stock_code, report_date, report_type)"]
+    }
+  }
+}

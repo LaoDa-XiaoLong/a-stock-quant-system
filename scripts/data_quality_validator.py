@@ -97,7 +97,7 @@ class DataQualityValidator:
         
         logger.info("数据质量验证器初始化完成")
     
-    def validate_financial_data(self, stock_code: str, stock_name: str, :
+    def validate_financial_data(self, stock_code: str, stock_name: str,
                                financial_data: Dict) -> Dict:
         """验证财务数据的合理性"""
         logger.info(f"验证股票 {stock_code} ({stock_name}) 的财务数据")

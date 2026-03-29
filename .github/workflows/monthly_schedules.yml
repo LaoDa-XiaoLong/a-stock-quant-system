@@ -1,0 +1,123 @@
+name: Monthly Schedules
+
+on:
+  schedule:
+    # 每月1号9:00运行策略回测
+    - cron: '0 9 1 * *'
+    # 每月15号10:00运行依赖检查
+    - cron: '0 10 15 * *'
+    # 每月20号14:00运行性能分析
+    - cron: '0 14 20 * *'
+    # 每月最后一天16:00运行里程碑回顾
+    - cron: '0 16 28-31 * *'
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  monthly-strategy-backtest:
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '0 9 1 * *' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.8'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pandas numpy
+    
+    - name: Run monthly strategy backtest
+      run: |
+        python scripts/monthly_strategy_backtest.py
+    
+    - name: Upload backtest results
+      uses: actions/upload-artifact@v3
+      with:
+        name: monthly-strategy-backtest
+        path: reports/strategy_backtest/
+
+  monthly-dependency-check:
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '0 10 15 * *' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.8'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Run monthly dependency check
+      run: |
+        python scripts/monthly_dependency_check.py
+    
+    - name: Upload dependency report
+      uses: actions/upload-artifact@v3
+      with:
+        name: monthly-dependency-check
+        path: reports/dependency_checks/
+
+  monthly-performance-analysis:
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '0 14 20 * *' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.8'
+    
+    - name: Run monthly performance analysis
+      run: |
+        python scripts/monthly_performance_analysis.py
+    
+    - name: Upload performance report
+      uses: actions/upload-artifact@v3
+      with:
+        name: monthly-performance-analysis
+        path: reports/performance_analysis/
+
+  monthly-milestone-review:
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '0 16 28-31 * *' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.8'
+    
+    - name: Run monthly milestone review
+      run: |
+        python scripts/monthly_milestone_review.py
+    
+    - name: Upload milestone review
+      uses: actions/upload-artifact@v3
+      with:
+        name: monthly-milestone-review
+        path: reports/milestone_reviews/
+    
+    - name: Send Feishu notification
+      if: success()
+      env:
+        FEISHU_WEBHOOK: ${{ secrets.FEISHU_WEBHOOK }}
+      run: |
+        echo "月度里程碑回顾完成，请查看报告"

@@ -1,0 +1,124 @@
+name: Weekly Schedules
+
+on:
+  schedule:
+    # 每周一9:00运行股票池筛选
+    - cron: '0 9 * * 1'
+    # 每周三10:00运行代码质量检查
+    - cron: '0 10 * * 3'
+    # 每周五14:00运行数据质量验证
+    - cron: '0 14 * * 5'
+    # 每周一9:30运行GitHub周报
+    - cron: '30 9 * * 1'
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  weekly-stock-screening:
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '0 9 * * 1' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.8'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pandas numpy
+    
+    - name: Run weekly stock screening
+      run: |
+        python scripts/weekly_stock_screening.py
+    
+    - name: Upload screening results
+      uses: actions/upload-artifact@v3
+      with:
+        name: weekly-stock-screening
+        path: data/stock_pool/
+
+  weekly-code-quality:
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '0 10 * * 3' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.8'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pylint black mypy pytest
+    
+    - name: Run weekly code quality check
+      run: |
+        python scripts/weekly_code_quality.py
+    
+    - name: Upload quality report
+      uses: actions/upload-artifact@v3
+      with:
+        name: weekly-code-quality
+        path: reports/code_quality/
+
+  weekly-data-quality:
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '0 14 * * 5' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.8'
+    
+    - name: Run weekly data quality validation
+      run: |
+        python scripts/weekly_data_quality.py
+    
+    - name: Upload validation report
+      uses: actions/upload-artifact@v3
+      with:
+        name: weekly-data-quality
+        path: data/quality_validation/
+
+  github-weekly-report:
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '30 9 * * 1' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.8'
+    
+    - name: Run GitHub weekly report
+      run: |
+        python scripts/github_weekly_report.py
+    
+    - name: Upload weekly report
+      uses: actions/upload-artifact@v3
+      with:
+        name: github-weekly-report
+        path: logs/github_weekly/
+    
+    - name: Send Feishu notification
+      if: success()
+      env:
+        FEISHU_WEBHOOK: ${{ secrets.FEISHU_WEBHOOK }}
+      run: |
+        echo "GitHub周报生成完成，可在Artifacts下载"

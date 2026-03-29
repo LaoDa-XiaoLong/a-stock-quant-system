@@ -1,4 +1,17 @@
-# Python
+# 数据文件 - 只提交数据结构和示例数据
+data/
+!data/README.md
+!data/sample/
+!data/structure/
+
+# 报告文件 - 不提交生成的报告
+reports/
+!reports/templates/
+
+# 日志文件
+logs/
+
+# 缓存和临时文件
 __pycache__/
 *.py[cod]
 *$py.class
@@ -16,164 +29,25 @@ parts/
 sdist/
 var/
 wheels/
-share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-MANIFEST
 
-# PyInstaller
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
-.pytest_cache/
-cover/
-
-# Translations
-*.mo
-*.pot
-
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
-
-# Flask stuff:
-instance/
-.webassets-cache
-
-# Scrapy stuff:
-.scrapy
-
-# Sphinx documentation
-docs/_build/
-
-# PyBuilder
-.pybuilder/
-target/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# IPython
-profile_default/
-ipython_config.py
-
-# pyenv
-.python-version
-
-# pipenv
-#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
-#   However, in case of collaboration, if having platform-specific dependencies or dependencies
-#   having no cross-platform support, pipenv may install dependencies that don't work, or not
-#   install all needed dependencies.
-#Pipfile.lock
-
-# poetry
-#poetry.lock
-
-# pdm
-.pdm.toml
-
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow
-__pypackages__/
-
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
-
-# SageMath parsed files
-*.sage.py
-
-# Environments
-.env
-.venv
-env/
+# 虚拟环境
 venv/
+env/
 ENV/
 env.bak/
 venv.bak/
 
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Pyre type checker
-.pyre/
-
-# pytype static type analyzer
-.pytype/
-
-# Cython debug symbols
-cython_debug/
-
-# Data files
-*.db
-*.db-journal
-*.sqlite
-*.sqlite3
-data/raw/
-data/processed/
-data/interim/
-data/external/
-data/quality_validation/
-data/final_financial/final_reports.db
-data/health_checks/
-data/stock_list.csv
-data/stock_pool/
-
-# Logs
-logs/
-*.log
-*.log.*
-
-# Reports
-reports/code_health_report.json
-reports/stock_pool_screening_report.json
-
-# Backups
-backups/
-*.backup
-
-# OpenClaw
-.openclaw/
-
-# IDE
+# IDE文件
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 
-# OS
+# 操作系统文件
 .DS_Store
 .DS_Store?
 ._*
@@ -182,52 +56,22 @@ backups/
 ehthumbs.db
 Thumbs.db
 
-# Temporary files
-*.tmp
-*.temp
-
-# Config files with secrets
+# 配置文件（敏感信息）
 config/*.json
-!config/financial_monitor_config.json
-!config/example_config.json
+!config/*_sample.json
+!config/structure/
 
-# Memory files (personal context)
+# 飞书测试文件
+feishu_test_report.json
+
+# 系统报告
+系统健康检查报告*.md
+
+# 内存文件（包含会话信息）
 memory/
-MEMORY.md
 
-# Personal identity files
-IDENTITY.md
-USER.md
-SOUL.md
-AGENTS.md
-TOOLS.md
-HEARTBEAT.md
-BOOTSTRAP.md
-
-# Test files
-test_*.py
-*_test.py
-
-# Large files
-*.zip
-*.tar.gz
-*.rar
-
-# Images
-*.png
-*.jpg
-*.jpeg
-*.gif
-*.bmp
-*.ico
-
-# PDFs
-*.pdf
-
-# Excel files
-*.xlsx
-*.xls
-*.csv
-
-# Jupyter notebooks
-*.ipynb
+# 个人配置
+*.local
+*.key
+*.pem
+*.crt
