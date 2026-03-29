@@ -1,0 +1,7 @@
+{
+  "name": "反转策略",
+  "version": "v1.0",
+  "description": "抄底超卖股，捕捉反弹机会",
+  "created": "2026-03-29T18:51:43.364902",
+  "source": "strategies/reversal_strategy_v1.py"
+}

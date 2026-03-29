@@ -1,0 +1,7 @@
+{
+  "name": "回测系统集成",
+  "version": "v1.0",
+  "description": "多策略回测评估",
+  "created": "2026-03-29T18:51:43.365865",
+  "source": "strategies/backtest_integration_v1.py"
+}

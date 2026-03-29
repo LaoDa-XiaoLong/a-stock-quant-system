@@ -1,0 +1,6 @@
+{
+  "name": "GitHub\u81ea\u52a8\u540c\u6b65",
+  "schedule": "*/30 * * * *",
+  "command": "cd /Users/ago/.openclaw/workspace && python3 scripts/auto_git_sync.py --check",
+  "description": "\u6bcf30\u5206\u949f\u81ea\u52a8\u540c\u6b65\u4ee3\u7801\u5230GitHub"
+}

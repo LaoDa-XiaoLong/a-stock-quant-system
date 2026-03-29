@@ -1,0 +1,32 @@
+# 中文字体配置 - 自动生成
+font.sans-serif : Arial Unicode MS, PingFang SC, Heiti SC, Hiragino Sans GB, STHeiti, SimHei, Microsoft YaHei, DejaVu Sans
+axes.unicode_minus : False
+
+# 图表优化设置
+figure.dpi : 150
+figure.figsize : 10, 6
+savefig.dpi : 300
+savefig.bbox : tight
+savefig.format : png
+
+# 线条和标记
+lines.linewidth : 1.5
+lines.markersize : 6
+
+# 网格和边框
+axes.grid : True
+axes.grid.which : both
+axes.grid.axis : both
+axes.axisbelow : True
+grid.alpha : 0.3
+
+# 字体大小
+font.size : 12
+axes.titlesize : 14
+axes.labelsize : 12
+xtick.labelsize : 10
+ytick.labelsize : 10
+legend.fontsize : 10
+
+# 颜色循环
+axes.prop_cycle : cycler('color', ['1f77b4', 'ff7f0e', '2ca02c', 'd62728', '9467bd', '8c564b', 'e377c2', '7f7f7f', 'bcbd22', '17becf'])

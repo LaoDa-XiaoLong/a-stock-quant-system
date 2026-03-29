@@ -962,7 +962,7 @@ class FinalFinancialMonitor:
             logger.error(f"❌ 飞书消息发送异常: {e}")
             return False
     
-    def save_results(self, date: str, total_stocks: int, holdings_surprises_count: int, 
+    def save_results(self, date: str, total_stocks: int, holdings_surprises_count: int, :
                     all_surprises_count: int, report_content: str, trading_summary: str, 
                     holdings_surprises: List):
         """保存监控结果"""

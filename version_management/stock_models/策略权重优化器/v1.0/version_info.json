@@ -1,0 +1,7 @@
+{
+  "name": "策略权重优化器",
+  "version": "v1.0",
+  "description": "动态调整多策略权重",
+  "created": "2026-03-29T18:51:43.365401",
+  "source": "strategies/strategy_weight_optimizer_v1.py"
+}

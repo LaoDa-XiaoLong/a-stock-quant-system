@@ -1,0 +1,7 @@
+{
+  "name": "动量策略",
+  "version": "v1.0",
+  "description": "追涨强势股，强者恒强",
+  "created": "2026-03-29T18:51:43.363906",
+  "source": "strategies/momentum_strategy_v1.py"
+}
