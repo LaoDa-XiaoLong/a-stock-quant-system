@@ -1,0 +1,7 @@
+{
+  "name": "系统健康检查报告发送",
+  "schedule": "0 10 * * *",
+  "command": "cd /Users/ago/.openclaw/workspace && python3 scripts/send_health_check_to_group.py",
+  "description": "每天10:00发送系统健康检查报告到工作群",
+  "enabled": true
+}

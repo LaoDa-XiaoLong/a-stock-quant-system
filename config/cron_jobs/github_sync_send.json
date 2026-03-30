@@ -1,0 +1,7 @@
+{
+  "name": "GitHub同步状态发送",
+  "schedule": "10 12 * * *",
+  "command": "cd /Users/ago/.openclaw/workspace && python3 scripts/send_github_sync_status.py",
+  "description": "每天12:10发送GitHub同步状态到工作群",
+  "enabled": true
+}
