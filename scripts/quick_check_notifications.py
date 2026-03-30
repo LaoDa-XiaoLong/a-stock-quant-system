@@ -20,8 +20,6 @@ def quick_check():
     # 检查关键服务
     print("\n1. 🔧 关键服务状态:")
     critical_services = [
-        "com.openclaw.healthcheck.send",
-        "com.openclaw.githubsync.send",
         "com.openclaw.health_check_report.send",
         "com.openclaw.github_sync_status.send",
         "com.openclaw.financial_report.send"
