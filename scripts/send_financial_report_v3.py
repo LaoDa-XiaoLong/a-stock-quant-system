@@ -3,11 +3,11 @@
             
             for i, (industry, rate, data) in enumerate(industry_rates[:5], 1):  # 显示前5个
                 if rate >= 50:
-                    lines.append(f"{i}. **<font color='green'>{industry}</font>**: {data['surprises']}/{data['total']}只超预期({rate:.1f}%)")
+                    lines.append(f"{i}. **🟢 {industry}**: {data['surprises']}/{data['total']}只超预期({rate:.1f}%)")
                 elif rate >= 30:
                     lines.append(f"{i}. **{industry}**: {data['surprises']}/{data['total']}只超预期({rate:.1f}%)")
                 else:
-                    lines.append(f"{i}. <font color='orange'>{industry}</font>: {data['surprises']}/{data['total']}只超预期({rate:.1f}%)")
+                    lines.append(f"{i}. 🟡 {industry}: {data['surprises']}/{data['total']}只超预期({rate:.1f}%)")
         
         # 极端值提醒
         if stats['extreme_values']:

@@ -20,7 +20,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-class DataQualityValidator:
+class DataQualityValidatorFixed:
     """数据质量验证器 - 修复版"""
     
     def __init__(self):
@@ -490,7 +490,7 @@ def main():
     print("版本: 1.0.0 (修复数据质量评估失效问题)")
     print("=" * 60)
     
-    validator = DataQualityValidator()
+    validator = DataQualityValidatorFixed()
     
     # 运行测试
     validator.test_fixed_validator()

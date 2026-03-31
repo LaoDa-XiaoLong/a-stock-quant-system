@@ -184,28 +184,28 @@ class FinancialReportSenderV3:
     def _format_percentage(self, value: float) -> str:
         """格式化百分比，添加颜色标记"""
         if value >= 0.20:  # ≥20%
-            return f"<font color='green'>📈 +{value*100:.1f}%</font>"
+            return f"🟢📈 +{value*100:.1f}%"
         elif value <= -0.20:  # ≤-20%
-            return f"<font color='red'>📉 {value*100:.1f}%</font>"
+            return f"🔴📉 {value*100:.1f}%"
         else:  # -20% < value < 20%
-            return f"<font color='blue'>📊 {value*100:+.1f}%</font>"
+            return f"🔵📊 {value*100:+.1f}%"
     
     def _get_trading_advice(self, stock: Dict) -> str:
         """根据股票数据生成交易建议"""
         surprise_ratio = stock.get('surprise_ratio', 0)
         
         if surprise_ratio >= 0.30:  # ≥30%
-            return "<font color='green'>✅ 强烈推荐加仓</font>"
+            return "🟢✅ 强烈推荐加仓"
         elif surprise_ratio >= 0.20:  # ≥20%
-            return "<font color='green'>✅ 考虑加仓</font>"
+            return "🟢✅ 考虑加仓"
         elif surprise_ratio >= 0.10:  # ≥10%
-            return "<font color='blue'>🔍 持有观察</font>"
+            return "🔵🔍 持有观察"
         elif surprise_ratio >= -0.10:  # -10% ~ 10%
-            return "<font color='gray'>📋 维持现状</font>"
+            return "⚪📋 维持现状"
         elif surprise_ratio >= -0.20:  # -20% ~ -10%
-            return "<font color='orange'>⚠️ 关注风险</font>"
+            return "🟡⚠️ 关注风险"
         else:  # < -20%
-            return "<font color='red'>🚨 考虑减仓</font>"
+            return "🔴🚨 考虑减仓"
     
     def generate_stock_analysis(self, stock: Dict) -> str:
         """生成单只股票的综合分析段落"""
