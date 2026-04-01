@@ -404,7 +404,7 @@ class StockPoolFilter:
         
         return results
     
-    def filter_stock_pool(self, symbols: List[str] = None, :
+    def filter_stock_pool(self, symbols: List[str] = None,
                          max_stocks: int = 100) -> pd.DataFrame:
         """筛选股票池"""
         if symbols is None:
@@ -412,5 +412,4 @@ class StockPoolFilter:
             all_stocks = self.get_all_a_shares()
             symbols = all_stocks['symbol'].tolist()
         
-        logger.info(f"开始筛选股票
-)
+        logger.info(f"开始筛选股票")
