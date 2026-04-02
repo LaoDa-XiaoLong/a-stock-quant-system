@@ -84,7 +84,7 @@ class TailEndSelection:
             },
             "trading": {
                 "initial_capital": 1000000,
-                "max_position_percent": 0.3,
+                "max_position_percent": 0.1,
                 "max_daily_loss": 0.05,
                 "max_trade_loss": 0.02,
                 "min_score": 70

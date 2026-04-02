@@ -1,0 +1,10 @@
+{
+  "skill_name": "尾盘选股法",
+  "version": "1.0",
+  "use_real_prices": true,
+  "price_source": "sina_finance",
+  "max_position_percent": 0.1,
+  "stop_loss_percent": 0.05,
+  "take_profit_percent": 0.08,
+  "last_updated": "2026-04-02 01:32:57"
+}
