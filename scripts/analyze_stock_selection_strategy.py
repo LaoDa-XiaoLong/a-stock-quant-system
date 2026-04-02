@@ -1,30 +1,30 @@
     value_stocks = sorted(value_stocks, key=lambda x: x['score'], reverse=True)[:5]
-    
+
     for i, stock in enumerate(value_stocks, 1):
         report += f"{i}. **{stock['code']} {stock['name']}**: 评分{stock['score']}分，今日{stock['change_pct']:+.2f}%\n"
-    
+
     report += f"""
 ### 4.2 成长投资策略 (高评分 + 高涨幅)
 推荐关注基本面优秀且近期表现强势的股票：
 """
-    
+
     growth_stocks = [s for s in all_stocks if s['score'] >= 85 and s['change_pct'] >= 2]
     growth_stocks = sorted(growth_stocks, key=lambda x: x['change_pct'], reverse=True)[:5]
-    
+
     for i, stock in enumerate(growth_stocks, 1):
         report += f"{i}. **{stock['code']} {stock['name']}**: 评分{stock['score']}分，今日{stock['change_pct']:+.2f}%\n"
-    
+
     report += f"""
 ### 4.3 反转投资策略 (今日下跌但基本面好)
 推荐关注今日下跌但基本面优秀的股票，可能有反弹机会：
 """
-    
+
     reversal_stocks = [s for s in all_stocks if s['change_pct'] < 0 and s['score'] >= 80]
     reversal_stocks = sorted(reversal_stocks, key=lambda x: x['score'], reverse=True)[:5]
-    
+
     for i, stock in enumerate(reversal_stocks, 1):
         report += f"{i}. **{stock['code']} {stock['name']}**: 评分{stock['score']}分，今日{stock['change_pct']:+.2f}%\n"
-    
+
     report += f"""
 ## 五、综合投资建议
 

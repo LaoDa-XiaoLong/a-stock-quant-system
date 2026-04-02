@@ -20,20 +20,20 @@ def simulate_macd_strategy(df, initial_cash=100000):
     cash = initial_cash
     position = 0
     trades = []
-    
+
     # 计算MACD指标
     exp1 = df['收盘'].ewm(span=12, adjust=False).mean()
     exp2 = df['收盘'].ewm(span=26, adjust=False).mean()
     macd = exp1 - exp2
     signal = macd.ewm(span=9, adjust=False).mean()
-    
+
     for i in range(1, len(df)):
         # 检查交易信号
         prev_macd = macd.iloc[i-1]
         prev_signal = signal.iloc[i-1]
         curr_macd = macd.iloc[i]
         curr_signal = signal.iloc[i]
-        
+
         # 买入信号：MACD上穿信号线
         if prev_macd <= prev_signal and curr_macd > curr_signal and position == 0:
             # 买入
@@ -51,7 +51,7 @@ def simulate_macd_strategy(df, initial_cash=100000):
                     'cash': cash,
                     'position': position
                 })
-        
+
         # 卖出信号：MACD下穿信号线
         elif prev_macd >= prev_signal and curr_macd < curr_signal and position > 0:
             # 卖出
@@ -67,7 +67,7 @@ def simulate_macd_strategy(df, initial_cash=100000):
                 'position': 0
             })
             position = 0
-    
+
     # 最后一天清仓
     if position > 0:
         price = df['收盘'].iloc[-1]
@@ -82,16 +82,16 @@ def simulate_macd_strategy(df, initial_cash=100000):
             'position': 0
         })
         position = 0
-    
+
     return cash, trades
 
 # 运行模拟
 final_cash, trades = simulate_macd_strategy(df)
-initial_cash = 100000
-total_return = (final_cash - initial_cash) / initial_cash
+INITIAL_CASH = 100000
+total_return = (final_cash - INITIAL_CASH) / INITIAL_CASH
 
 print(f"\n策略回测结果:")
-print(f"初始资金: {initial_cash:.2f}")
+print(f"初始资金: {INITIAL_CASH:.2f}")
 print(f"最终资金: {final_cash:.2f}")
 print(f"总收益率: {total_return:.2%}")
 print(f"交易次数: {len(trades)}")

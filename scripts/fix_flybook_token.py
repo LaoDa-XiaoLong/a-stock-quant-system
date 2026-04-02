@@ -12,17 +12,17 @@ from datetime import datetime
 def fix_flybook_token_error():
     """修复飞书token错误"""
     print("🔧 修复飞书token错误问题")
-    
+
     # 1. 检查jobs.json文件
     jobs_file = "/Users/ago/.openclaw/cron/jobs.json"
     if not os.path.exists(jobs_file):
         print(f"❌ 文件不存在: {jobs_file}")
         return False
-    
+
     # 2. 读取配置文件
     with open(jobs_file, 'r', encoding='utf-8') as f:
         data = json.load(f)
-    
+
     # 3. 找到代码健康度检查任务
     fixed = False
     for job in data['jobs']:
@@ -30,18 +30,18 @@ def fix_flybook_token_error():
             print(f"📋 找到任务: {job['name']}")
             print(f"   当前状态: {job['state'].get('lastRunStatus', 'unknown')}")
             print(f"   错误信息: {job['state'].get('lastError', '无')}")
-            
+
             # 修复方案1: 暂时禁用该任务
             job['enabled'] = False
             job['state']['lastError'] = "已禁用，需要配置飞书token"
             job['state']['lastRunStatus'] = "disabled"
-            
+
             print(f"✅ 已暂时禁用任务")
             print(f"   修复说明: 需要配置飞书API token，暂时禁用避免重复错误")
-            
+
             fixed = True
             break
-    
+
     # 4. 保存修复后的配置
     if fixed:
         # 备份原文件
@@ -49,12 +49,12 @@ def fix_flybook_token_error():
         with open(backup_file, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
         print(f"💾 备份原文件: {backup_file}")
-        
+
         # 保存修复文件
         with open(jobs_file, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
         print(f"💾 保存修复文件: {jobs_file}")
-        
+
         return True
     else:
         print("❌ 未找到代码健康度检查任务")
@@ -64,7 +64,7 @@ def fix_flybook_token_error():
 def check_flybook_config():
     """检查飞书配置"""
     print("\n🔍 检查飞书配置状态")
-    
+
     # 可能的配置位置
     config_locations = [
         "/Users/ago/.openclaw/config.json",
@@ -72,7 +72,7 @@ def check_flybook_config():
         "/Users/ago/.openclaw/workspace/config/feishu.json",
         os.path.expanduser("~/.openclaw/config.json")
     ]
-    
+
     found_config = False
     for config_file in config_locations:
         if os.path.exists(config_file):
@@ -88,10 +88,10 @@ def check_flybook_config():
                 found_config = True
             except Exception as e:
                 print(f"   读取失败: {e}")
-    
+
     if not found_config:
         print("❌ 未找到飞书配置文件")
-    
+
     return found_config
 
 
@@ -160,7 +160,7 @@ openclaw cron list --all
 openclaw cron run 17da0ef4-47a1-47c2-b925-365131db70a7
 ```
 """
-    
+
     return guide
 
 
@@ -169,38 +169,38 @@ def main():
     print("=" * 60)
     print("🚀 飞书token错误修复工具")
     print("=" * 60)
-    
+
     # 1. 修复token错误
     print("\n1. 修复调度任务配置...")
     if fix_flybook_token_error():
         print("✅ 修复成功")
     else:
         print("❌ 修复失败")
-    
+
     # 2. 检查配置
     print("\n2. 检查飞书配置...")
     check_flybook_config()
-    
+
     # 3. 显示修复指南
     print("\n3. 修复指南:")
     guide = create_fix_guide()
     print(guide)
-    
+
     # 4. 保存指南到文件
     guide_file = "/Users/ago/.openclaw/workspace/docs/fix_flybook_token_guide.md"
     with open(guide_file, 'w', encoding='utf-8') as f:
         f.write(guide)
     print(f"💾 修复指南已保存: {guide_file}")
-    
+
     print("\n" + "=" * 60)
     print("✅ 修复完成")
     print("=" * 60)
-    
+
     print("\n🎯 下一步:")
     print("1. 代码健康度检查任务已暂时禁用")
     print("2. 需要您配置飞书token后重新启用")
     print("3. 其他任务不受影响，明天正常执行")
-    
+
     return True
 
 

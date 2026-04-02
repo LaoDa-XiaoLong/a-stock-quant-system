@@ -7,10 +7,10 @@ import os
 def main():
     print(f"🎯 每月项目里程碑回顾 - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("=" * 60)
-    
+
     current_month = datetime.now().strftime('%Y-%m')
     last_month = (datetime.now().replace(day=1) - datetime.timedelta(days=1)).strftime('%Y-%m')
-    
+
     # 本月完成工作
     completed_work = [
         "完成财报监控系统开发",
@@ -19,7 +19,7 @@ def main():
         "开发股票池筛选功能",
         "完善项目文档体系",
     ]
-    
+
     # 下月计划
     next_month_plan = [
         "开发仓位管理系统",
@@ -28,7 +28,7 @@ def main():
         "完善风险控制系统",
         "建立团队协作流程",
     ]
-    
+
     # 关键指标
     key_metrics = {
         "代码行数": "25,000+",
@@ -37,7 +37,7 @@ def main():
         "问题解决时间": "<24小时",
         "团队满意度": "4.8/5.0",
     }
-    
+
     # 保存报告
     report = {
         "review_period": f"{last_month} 至 {current_month}",
@@ -58,26 +58,26 @@ def main():
         ],
         "generated_at": datetime.now().isoformat()
     }
-    
+
     report_dir = "reports/milestone_reviews"
     os.makedirs(report_dir, exist_ok=True)
     report_file = f"{report_dir}/milestone_review_{current_month}.json"
-    
+
     with open(report_file, 'w', encoding='utf-8') as f:
         json.dump(report, f, ensure_ascii=False, indent=2)
-    
+
     print(f"回顾报告: {report_file}")
     print(f"回顾周期: {report['review_period']}")
     print(f"完成工作: {len(completed_work)}项")
-    
+
     print(f"\n本月完成:")
     for work in completed_work:
         print(f"  ✅ {work}")
-    
+
     print(f"\n下月计划:")
     for plan in next_month_plan:
         print(f"  📅 {plan}")
-    
+
     print(f"\n关键指标:")
     for metric, value in key_metrics.items():
         print(f"  📊 {metric}: {value}")

@@ -31,10 +31,10 @@ print("=" * 70)
 if os.path.exists(portfolio_file):
     with open(portfolio_file, 'r', encoding='utf-8') as f:
         portfolio = json.load(f)
-    
+
     selected_stocks = portfolio['stocks']
     selected_codes = [s['code'] for s in selected_stocks]
-    
+
     print("📊 选股策略分解:")
     print()
     print("1. 📈 第一步：原始筛选（20只股票）")
@@ -42,7 +42,7 @@ if os.path.exists(portfolio_file):
     print(f"   时间: {screening_data['date']} {screening_data['time']}")
     print(f"   标准: 市值前列/流动性好")
     print()
-    
+
     print("2. 🎯 第二步：精选过滤（从20只到5只）")
     print("   过滤标准:")
     print("   a) 评分 ≥ 85分（确保股票质量）")
@@ -50,7 +50,7 @@ if os.path.exists(portfolio_file):
     print("   c) 排除普通ST股票（控制风险，保留*ST观察）")
     print("   d) 选择评分最高的前5只（集中投资）")
     print()
-    
+
     print("3. 📊 第三步：详细分析选中的5只股票")
     for stock in selected_stocks:
         print(f"   {stock['code']} {stock['name']}")
@@ -177,7 +177,7 @@ report_content = f"""# 📊 选股策略详细分析报告
 
 ### 1.1 选股流程
 1. **原始筛选**: 20只股票，基于"市值前列/流动性好"
-2. **精选过滤**: 
+2. **精选过滤**:
    - 评分 ≥ 85分
    - 今日涨跌在 -2% 到 +5% 之间
    - 排除普通ST股票

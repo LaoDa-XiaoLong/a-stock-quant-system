@@ -8,7 +8,7 @@ import os
 def check_dependencies():
     print(f"🔍 每月依赖包检查 - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("=" * 60)
-    
+
     # 模拟检查结果
     dependencies = [
         {"package": "pandas", "current": "1.5.3", "latest": "2.0.0", "status": "⚠️ 可更新"},
@@ -17,12 +17,12 @@ def check_dependencies():
         {"package": "requests", "current": "2.28.2", "latest": "2.31.0", "status": "⚠️ 可更新"},
         {"package": "pytest", "current": "7.4.0", "latest": "7.4.0", "status": "✅ 最新"},
     ]
-    
+
     # 安全漏洞检查
     vulnerabilities = [
         {"package": "旧版本库", "severity": "低", "description": "无关键漏洞"},
     ]
-    
+
     # 保存报告
     report = {
         "check_date": datetime.now().strftime('%Y-%m-%d'),
@@ -38,20 +38,20 @@ def check_dependencies():
         ],
         "generated_at": datetime.now().isoformat()
     }
-    
+
     report_dir = "reports/dependency_checks"
     os.makedirs(report_dir, exist_ok=True)
     report_file = f"{report_dir}/dependency_check_{datetime.now().strftime('%Y%m%d')}.json"
-    
+
     with open(report_file, 'w', encoding='utf-8') as f:
         json.dump(report, f, ensure_ascii=False, indent=2)
-    
+
     print(f"检查完成: {report_file}")
     print(f"依赖总数: {len(dependencies)}个")
     print(f"最新版本: {report['up_to_date']}个")
     print(f"可更新: {report['can_update']}个")
     print(f"安全漏洞: {len(vulnerabilities)}个")
-    
+
     for dep in dependencies:
         print(f"{dep['status']} {dep['package']}: {dep['current']} → {dep['latest']}")
 

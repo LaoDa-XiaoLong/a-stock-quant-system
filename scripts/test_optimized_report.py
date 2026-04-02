@@ -15,10 +15,10 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 def create_sample_report():
     """创建示例报告数据"""
-    
+
     # 模拟报告数据
     report_date = datetime.now().strftime('%Y-%m-%d')
-    
+
     # 股票数据示例
     sample_stocks = [
         {
@@ -141,7 +141,7 @@ def create_sample_report():
             'surprise_ratio': 0.022
         }
     ]
-    
+
     # 构建完整报告
     report = {
         'date': report_date,
@@ -164,7 +164,7 @@ def create_sample_report():
             '物流': {'total': 1, 'surprises': 0, 'holdings': 1}
         }
     }
-    
+
     return report
 
 
@@ -173,33 +173,33 @@ def test_core_summary():
     print("=" * 60)
     print("📋 测试核心摘要生成")
     print("=" * 60)
-    
+
     from send_financial_report_optimized import OptimizedFinancialReportSender
-    
+
     # 创建发送器实例
     sender = OptimizedFinancialReportSender()
-    
+
     # 创建示例报告
     report = create_sample_report()
-    
+
     # 生成核心摘要
     core_summary = sender.generate_core_summary(report)
-    
+
     print("\n📱 核心摘要预览（飞书消息格式）:")
     print("-" * 40)
     print(core_summary)
     print("-" * 40)
-    
+
     # 统计信息
     lines = core_summary.split('\n')
     char_count = len(core_summary)
     line_count = len(lines)
-    
+
     print(f"\n📊 统计信息:")
     print(f"• 总字符数: {char_count}")
     print(f"• 行数: {line_count}")
     print(f"• 建议长度: {'✅ 合适' if char_count < 1000 else '⚠️ 可能过长'}")
-    
+
     return core_summary
 
 
@@ -208,30 +208,30 @@ def test_detailed_analysis():
     print("\n" + "=" * 60)
     print("📊 测试详细分析生成")
     print("=" * 60)
-    
+
     from send_financial_report_optimized import OptimizedFinancialReportSender
-    
+
     # 创建发送器实例
     sender = OptimizedFinancialReportSender()
-    
+
     # 创建示例报告
     report = create_sample_report()
-    
+
     # 生成详细分析
     detailed_analysis = sender.generate_detailed_analysis(report)
-    
+
     print("\n📄 详细分析预览（前200字符）:")
     print("-" * 40)
     print(detailed_analysis[:500] + "..." if len(detailed_analysis) > 500 else detailed_analysis)
     print("-" * 40)
-    
+
     # 统计信息
     char_count = len(detailed_analysis)
-    
+
     print(f"\n📊 统计信息:")
     print(f"• 总字符数: {char_count}")
     print(f"• 建议: 作为第二层消息或附件发送")
-    
+
     return detailed_analysis
 
 
@@ -240,32 +240,32 @@ def test_message_length_control():
     print("\n" + "=" * 60)
     print("📏 测试消息长度控制")
     print("=" * 60)
-    
+
     from send_financial_report_optimized import OptimizedFinancialReportSender
-    
+
     sender = OptimizedFinancialReportSender()
     report = create_sample_report()
-    
+
     # 生成两种消息
     core_summary = sender.generate_core_summary(report)
     detailed_analysis = sender.generate_detailed_analysis(report)
-    
+
     print("📱 核心摘要长度分析:")
     print(f"• 字符数: {len(core_summary)}")
     print(f"• 飞书限制: 约2000字符")
     print(f"• 状态: {'✅ 安全' if len(core_summary) < 1500 else '⚠️ 接近限制'}")
-    
+
     print("\n📄 详细分析长度分析:")
     print(f"• 字符数: {len(detailed_analysis)}")
     print(f"• 建议: {'✅ 可作为第二层消息' if len(detailed_analysis) < 3000 else '📎 建议作为附件'}")
-    
+
     # 检查是否有截断风险
     print("\n🔍 截断风险检查:")
-    
+
     # 检查长行
     lines = core_summary.split('\n')
     long_lines = [line for line in lines if len(line) > 100]
-    
+
     if long_lines:
         print(f"⚠️ 发现{len(long_lines)}行长于100字符:")
         for i, line in enumerate(long_lines[:3], 1):
@@ -279,30 +279,30 @@ def preview_final_output():
     print("\n" + "=" * 60)
     print("🎯 最终输出效果预览")
     print("=" * 60)
-    
+
     from send_financial_report_optimized import OptimizedFinancialReportSender
-    
+
     sender = OptimizedFinancialReportSender()
     report = create_sample_report()
-    
+
     print("\n📱 第一层：核心摘要（即时发送）")
     print("-" * 40)
     core = sender.generate_core_summary(report)
     print(core)
-    
+
     print("\n⏳ 等待5秒...")
     print("\n📄 第二层：详细分析（补充发送）")
     print("-" * 40)
     detailed = sender.generate_detailed_analysis(report)
-    
+
     # 显示详细分析的前面部分
     lines = detailed.split('\n')
     for i, line in enumerate(lines[:20]):  # 只显示前20行
         print(line)
-    
+
     if len(lines) > 20:
         print("...（完整内容共{}行）".format(len(lines)))
-    
+
     print("\n✅ 分层发送方案预览完成")
     print("• 第一层：核心信息，快速阅读")
     print("• 第二层：详细分析，深度了解")
@@ -313,33 +313,33 @@ def main():
     """主测试函数"""
     print("🚀 开始测试优化版财报报告模板")
     print("=" * 60)
-    
+
     try:
         # 运行各项测试
         test_core_summary()
         test_detailed_analysis()
         test_message_length_control()
         preview_final_output()
-        
+
         print("\n" + "=" * 60)
         print("✅ 所有测试完成！")
         print("=" * 60)
-        
+
         print("\n🎯 优化版模板优势总结:")
         print("1. ✅ 信息完整：包含所有关键维度")
         print("2. ✅ 避免截断：分层发送，控制长度")
         print("3. ✅ 阅读友好：移动端优化格式")
         print("4. ✅ 重点突出：核心摘要3秒可读")
         print("5. ✅ 实用性强：明确的交易建议")
-        
+
         print("\n🔧 实施建议:")
         print("1. 替换现有的 send_financial_report.py")
         print("2. 更新调度任务配置")
         print("3. 测试实际发送效果")
         print("4. 根据反馈迭代优化")
-        
+
         return True
-        
+
     except Exception as e:
         print(f"❌ 测试失败: {e}")
         import traceback

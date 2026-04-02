@@ -14,7 +14,7 @@ from datetime import datetime
 def send_to_feishu_group(content, title):
     """发送到飞书群"""
     webhook_url = "https://open.feishu.cn/open-apis/bot/v2/hook/7c6e2bb9-0f2f-4d16-ade1-e93cf6bd3065"
-    
+
     message = {
         "msg_type": "interactive",
         "card": {
@@ -48,7 +48,7 @@ def send_to_feishu_group(content, title):
             ]
         }
     }
-    
+
     try:
         response = requests.post(webhook_url, json=message, timeout=10)
         if response.status_code == 200:
@@ -64,10 +64,10 @@ def send_to_feishu_group(content, title):
 def main():
     print(f"🚀 开始发送{task['name']}")
     print("=" * 60)
-    
+
     # 这里应该包含具体的业务逻辑
     # 例如：读取报告文件、生成内容等
-    
+
     content = f"""
 **任务名称**: 数据备份任务状态
 **执行时间**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
@@ -78,27 +78,27 @@ def main():
 
 **下一步**: 检查具体业务数据并生成详细报告。
 """
-    
+
     success = send_to_feishu_group(content, task['name'])
-    
+
     if success:
         # 记录日志
         log_dir = "/Users/ago/.openclaw/workspace/logs/group_notifications"
         os.makedirs(log_dir, exist_ok=True)
         log_file = os.path.join(log_dir, f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{task['name'].replace(' ', '_')}.json")
-        
+
         log_data = {
             "task": task['name'],
             "timestamp": datetime.now().isoformat(),
             "target_group": task['target_group'],
             "status": "success"
         }
-        
+
         with open(log_file, 'w', encoding='utf-8') as f:
             json.dump(log_data, f, ensure_ascii=False, indent=2)
-        
+
         print(f"✅ 发送日志已保存: {log_file}")
-    
+
     return success
 
 if __name__ == "__main__":

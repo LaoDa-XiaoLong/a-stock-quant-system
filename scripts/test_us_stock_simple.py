@@ -12,34 +12,34 @@ import os
 
 class SimpleUSStockTester:
     """简化版美股测试器"""
-    
+
     def __init__(self):
         self.cache_dir = "data/us_stocks"
         os.makedirs(self.cache_dir, exist_ok=True)
-        
+
         # 测试股票列表（简化）
         self.test_symbols = {
             'AAPL': '苹果',
-            'MSFT': '微软', 
+            'MSFT': '微软',
             'NVDA': '英伟达',
             'TSM': '台积电',
             'BABA': '阿里巴巴'
         }
-    
+
     def test_with_mock_data(self):
         """使用模拟数据测试"""
         print("美股数据获取测试（模拟数据）")
         print("=" * 50)
-        
+
         results = []
-        
+
         for symbol, name in self.test_symbols.items():
             print(f"处理 {symbol} ({name})...")
-            
+
             try:
                 # 生成模拟数据
                 mock_data = self.generate_mock_data(symbol, name)
-                
+
                 result = {
                     'symbol': symbol,
                     'name': name,
@@ -51,14 +51,14 @@ class SimpleUSStockTester:
                     'info_keys': len(mock_data['info']),
                     'error': None
                 }
-                
+
                 results.append(result)
-                
+
                 # 保存模拟数据
                 self.save_mock_data(symbol, mock_data)
-                
+
                 print(f"  ✅ 模拟成功: {len(mock_data['history'])}个数据点, 最新价: {mock_data['latest_price']:.2f}")
-                
+
             except Exception as e:
                 error_result = {
                     'symbol': symbol,
@@ -73,22 +73,22 @@ class SimpleUSStockTester:
                 }
                 results.append(error_result)
                 print(f"  ❌ 模拟失败: {e}")
-        
+
         # 显示结果
         self.display_results(results)
-        
+
         # 生成报告
         report_file = self.generate_report(results)
-        
+
         return results, report_file
-    
+
     def generate_mock_data(self, symbol, name):
         """生成模拟数据"""
         # 生成过去30天的日期
         end_date = datetime.now()
         start_date = end_date - timedelta(days=30)
         dates = pd.date_range(start=start_date, end=end_date, freq='D')
-        
+
         # 基础价格（根据股票不同）
         base_prices = {
             'AAPL': 180.0,
@@ -97,14 +97,14 @@ class SimpleUSStockTester:
             'TSM': 150.0,
             'BABA': 80.0
         }
-        
+
         base_price = base_prices.get(symbol, 100.0)
-        
+
         # 生成价格序列
         np.random.seed(hash(symbol) % 10000)
         returns = np.random.normal(0.001, 0.02, len(dates))
         prices = base_price * np.cumprod(1 + returns)
-        
+
         # 创建历史数据DataFrame
         history_data = pd.DataFrame({
             'Date': dates,
@@ -114,7 +114,7 @@ class SimpleUSStockTester:
             'Close': prices,
             'Volume': np.random.randint(1000000, 10000000, len(dates))
         })
-        
+
         # 公司信息
         info_data = {
             'symbol': symbol,
@@ -127,81 +127,81 @@ class SimpleUSStockTester:
             'beta': np.random.uniform(0.8, 1.2),
             'update_time': datetime.now().isoformat()
         }
-        
+
         return {
             'history': history_data,
             'latest_price': prices[-1],
             'latest_date': dates[-1].strftime('%Y-%m-%d'),
             'info': info_data
         }
-    
+
     def save_mock_data(self, symbol, mock_data):
         """保存模拟数据"""
         # 保存历史数据
         hist_file = os.path.join(self.cache_dir, f"{symbol}_history_mock.csv")
         mock_data['history'].to_csv(hist_file, index=False, encoding='utf-8')
-        
+
         # 保存公司信息
         info_file = os.path.join(self.cache_dir, f"{symbol}_info_mock.json")
         with open(info_file, 'w', encoding='utf-8') as f:
             json.dump(mock_data['info'], f, ensure_ascii=False, indent=2)
-    
+
     def display_results(self, results):
         """显示结果"""
         print("\n" + "=" * 50)
         print("测试结果汇总")
         print("=" * 50)
-        
+
         success_count = sum(1 for r in results if r['status'] == '模拟成功')
         total_count = len(results)
-        
+
         print(f"测试股票数: {total_count}")
         print(f"成功: {success_count}")
         print(f"失败: {total_count - success_count}")
         print(f"成功率: {success_count/total_count*100:.1f}%")
-        
+
         print("\n详细结果:")
         print("-" * 80)
         print(f"{'代码':<8} {'名称':<10} {'状态':<8} {'数据点':<8} {'最新价':<10} {'响应时间':<10}")
         print("-" * 80)
-        
+
         for result in results:
             print(f"{result['symbol']:<8} {result['name']:<10} {result['status']:<8} "
                   f"{result['data_points']:<8} {result['latest_price']:<10.2f} "
                   f"{result['response_time']:<10}")
-    
+
     def generate_report(self, results):
         """生成测试报告"""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         report_file = os.path.join(self.cache_dir, f"mock_test_report_{timestamp}.md")
-        
+
         report = []
         report.append("# 美股数据获取测试报告（模拟数据）")
         report.append(f"测试时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         report.append("测试说明: 使用模拟数据测试数据获取流程")
         report.append("")
-        
+
         # 汇总统计
         success_count = sum(1 for r in results if r['status'] == '模拟成功')
         total_count = len(results)
-        
+
         report.append("## 测试结果汇总")
         report.append(f"- 测试股票数: {total_count}")
         report.append(f"- 成功: {success_count}")
         report.append(f"- 失败: {total_count - success_count}")
         report.append(f"- 成功率: {success_count/total_count*100:.1f}%")
         report.append("")
-        
+
         # 详细结果
         report.append("## 详细测试结果")
         report.append("| 代码 | 名称 | 状态 | 数据点 | 最新价 | 响应时间 |")
         report.append("|------|------|------|--------|--------|----------|")
-        
+
         for result in results:
             report.append(f"| {result['symbol']} | {result['name']} | {result['status']} | "
                          f"{result['data_points']} | {result['latest_price']:.2f} | "
                          f"{result['response_time']} |")
-        
+
         # 结论与建议
         report.append("")
         report.append("## 结论与建议")
@@ -226,18 +226,18 @@ class SimpleUSStockTester:
         report.append("   - 添加yfinance作为备用（解决兼容性问题后）")
         report.append("   - 考虑IEX Cloud等其他数据源")
         report.append("   - 实现数据源故障转移")
-        
+
         # 保存报告
         with open(report_file, 'w', encoding='utf-8') as f:
             f.write("\n".join(report))
-        
+
         print(f"\n测试报告已保存: {report_file}")
         return report_file
-    
+
     def create_alpha_vantage_guide(self):
         """创建Alpha Vantage使用指南"""
         guide_file = os.path.join(self.cache_dir, "alpha_vantage_guide.md")
-        
+
         guide = []
         guide.append("# Alpha Vantage 使用指南")
         guide.append("")
@@ -322,10 +322,10 @@ class SimpleUSStockTester:
         guide.append("2. 测试基础API调用")
         guide.append("3. 集成到我们的数据获取系统")
         guide.append("4. 开发数据缓存和错误处理")
-        
+
         with open(guide_file, 'w', encoding='utf-8') as f:
             f.write("\n".join(guide))
-        
+
         print(f"\nAlpha Vantage使用指南已保存: {guide_file}")
         return guide_file
 
@@ -334,16 +334,16 @@ def main():
     """主函数"""
     print("简化版美股数据测试")
     print("=" * 50)
-    
+
     # 创建测试器
     tester = SimpleUSStockTester()
-    
+
     # 使用模拟数据测试
     results, report_file = tester.test_with_mock_data()
-    
+
     # 创建Alpha Vantage指南
     guide_file = tester.create_alpha_vantage_guide()
-    
+
     print("\n" + "=" * 50)
     print("测试完成")
     print(f"测试报告: {report_file}")

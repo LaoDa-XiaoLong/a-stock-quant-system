@@ -15,8 +15,7 @@ disable=
     too-few-public-methods,
     protected-access,
     duplicate-code,
-    # 与black冲突的格式检查
-    bad-continuation,
+    # 格式检查（由black处理）
     wrong-import-position,
     # 其他
     fixme,
@@ -54,12 +53,6 @@ enable=
     eval-used,
     exec-used,
     global-statement,
-    bad-builtin,
-    apply-builtin,
-    filter-builtin-not-iterating,
-    map-builtin-not-iterating,
-    zip-builtin-not-iterating,
-    range-builtin-not-iterating,
     # 字符串
     anomalous-backslash-in-string,
     bad-open-mode,
@@ -72,10 +65,8 @@ enable=
     deprecated-module,
     # 其他
     super-with-arguments,
-    raising-string,
     # 格式
     trailing-whitespace,
-    mixed-indentation,
     unexpected-line-ending-format,
     bad-indentation,
     missing-final-newline,
@@ -226,7 +217,7 @@ min-public-methods=1
 [EXCEPTIONS]
 
 # 异常检查
-overgeneral-exceptions=Exception
+overgeneral-exceptions=builtins.Exception
 ignored-modules=
     numpy,
     pandas,

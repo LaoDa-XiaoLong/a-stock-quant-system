@@ -19,26 +19,26 @@ def print_header(title):
 def run_script(script_path, description):
     """运行Python脚本"""
     print_header(description)
-    
+
     if not os.path.exists(script_path):
         print(f"脚本不存在: {script_path}")
         return False
-    
+
     try:
         # 运行脚本
-        result = subprocess.run([sys.executable, script_path], 
+        result = subprocess.run([sys.executable, script_path],
                               capture_output=True, text=True, encoding='utf-8')
-        
+
         # 打印输出
         if result.stdout:
             print(result.stdout)
-        
+
         if result.stderr:
             print("错误输出:")
             print(result.stderr)
-        
-        return result.returncode == 0
-    
+
+        return not result.returncode
+
     except Exception as e:
         print(f"运行脚本时出错: {e}")
         return False
@@ -46,7 +46,7 @@ def run_script(script_path, description):
 def generate_final_report():
     """生成最终报告"""
     print_header("量化分析最终报告")
-    
+
     report_content = f"""
 # 量化股票分析报告
 生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
@@ -115,15 +115,15 @@ def generate_final_report():
 - 回测结果不代表未来表现
 - 实盘交易需谨慎，注意风险控制
 """
-    
+
     # 保存报告
     if not os.path.exists('reports'):
         os.makedirs('reports')
-    
+
     report_file = 'reports/final_report.md'
     with open(report_file, 'w', encoding='utf-8') as f:
         f.write(report_content)
-    
+
     print(f"最终报告已生成: {report_file}")
     print("\n报告内容预览:")
     print("-" * 40)
@@ -134,9 +134,9 @@ def main():
     """主函数"""
     print_header("量化股票分析系统")
     print("开始执行完整的量化分析流程...")
-    
+
     start_time = time.time()
-    
+
     # 步骤1: 数据获取
     print("注意: 使用示例数据代替真实数据（避免依赖问题）")
     print("实际使用时请配置真实数据源")
@@ -144,31 +144,31 @@ def main():
     if not success1:
         print("数据获取失败，跳过后续步骤")
         return
-    
+
     # 步骤2: 数据分析
     success2 = run_script('scripts/basic_analysis.py', '步骤2: 数据分析')
     if not success2:
         print("数据分析失败，跳过策略回测")
         # 继续生成报告
-    
+
     # 步骤3: 策略回测
     success3 = run_script('strategies/simple_macd_strategy.py', '步骤3: 策略回测')
-    
+
     # 步骤4: 生成最终报告
     generate_final_report()
-    
+
     # 计算总耗时
     elapsed_time = time.time() - start_time
     print_header("执行完成")
     print(f"总耗时: {elapsed_time:.2f} 秒")
-    
+
     # 总结
     print("\n执行结果:")
     print(f"✓ 数据获取: {'成功' if success1 else '失败'}")
     print(f"✓ 数据分析: {'成功' if success2 else '失败'}")
     print(f"✓ 策略回测: {'成功' if success3 else '失败'}")
     print(f"✓ 最终报告: 已生成")
-    
+
     print("\n生成的文件:")
     if os.path.exists('data'):
         print("  data/ - 数据目录")
@@ -177,7 +177,7 @@ def main():
         reports = os.listdir('reports')
         for report in reports:
             print(f"    {report}")
-    
+
     print("\n下一步建议:")
     print("1. 查看 reports/final_report.md 了解完整分析")
     print("2. 查看 reports/ 目录中的图表和交易记录")

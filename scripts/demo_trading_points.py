@@ -7,7 +7,7 @@
 
 def demo_trading_points():
     """演示交易点位"""
-    
+
     print("=" * 70)
     print("🎯 7个量化策略交易点位能力演示")
     print("=" * 70)
@@ -16,7 +16,7 @@ def demo_trading_points():
     print("  2. ✅ 入场点位")
     print("  3. ✅ 出场点位（或持有策略）")
     print("=" * 70)
-    
+
     # 演示7个策略的输出能力
     strategies = [
         {
@@ -69,22 +69,22 @@ def demo_trading_points():
             "example": "生益科技 (600183) - 入场: PE<20区域，出场: PE>30或业绩下滑"
         }
     ]
-    
+
     print("\n📋 7个策略输出能力对比")
     print("=" * 70)
-    
+
     for i, strategy in enumerate(strategies, 1):
         print(f"\n{i}. 🎯 {strategy['name']}")
         print(f"   股票标的: {strategy['stock_output']}")
         print(f"   入场点位: {strategy['entry_points']}")
         print(f"   出场点位: {strategy['exit_points']}")
         print(f"   示例: {strategy['example']}")
-    
+
     # 演示完整交易计划
     print("\n" + "=" * 70)
     print("📋 完整交易计划示例")
     print("=" * 70)
-    
+
     print("""
 🎯 比亚迪 (002594) - 多策略共识交易计划
 ==================================================
@@ -146,12 +146,12 @@ def demo_trading_points():
   胜率估计: 65-70%
   夏普比率: 1.8-2.2
 """)
-    
+
     # 演示明日实际输出
     print("\n" + "=" * 70)
     print("🚀 明日实际输出示例")
     print("=" * 70)
-    
+
     print("""
 📅 2026-03-30 交易建议报告
 ================================
@@ -193,12 +193,12 @@ def demo_trading_points():
    • 风险: 基本面疲软，技术面偏弱
    • 建议: 减仓或观望
 """)
-    
+
     # 技术实现说明
     print("\n" + "=" * 70)
     print("🔧 技术实现要点")
     print("=" * 70)
-    
+
     print("""
 📊 点位计算逻辑
 1. 入场点位计算:
@@ -235,12 +235,12 @@ def demo_trading_points():
    • 策略表现对比
    • 参数优化迭代
 """)
-    
+
     # 总结
     print("\n" + "=" * 70)
     print("✅ 总结：7个策略完全具备所需能力")
     print("=" * 70)
-    
+
     print("""
 🎯 已实现的能力:
 1. ✅ 具体股票标的 - 所有策略都能输出具体股票
@@ -263,7 +263,7 @@ def demo_trading_points():
 4. 定期评估策略表现，持续优化
 5. 结合市场环境调整策略权重
 """)
-    
+
     print("\n" + "=" * 70)
     print("🎉 交易点位演示完成！")
     print("=" * 70)

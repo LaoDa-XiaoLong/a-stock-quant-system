@@ -7,7 +7,7 @@ import os
 def main():
     print(f"📈 每月策略回测 - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("=" * 60)
-    
+
     # 模拟回测结果
     strategies = [
         {
@@ -20,7 +20,7 @@ def main():
             "status": "✅ 表现良好"
         },
         {
-            "name": "均线策略", 
+            "name": "均线策略",
             "period": "2026-01-01 至 2026-03-31",
             "total_return": "8.3%",
             "sharpe_ratio": 1.2,
@@ -38,7 +38,7 @@ def main():
             "status": "✅ 表现优秀"
         }
     ]
-    
+
     # 保存报告
     report = {
         "month": datetime.now().strftime('%Y-%m'),
@@ -48,19 +48,19 @@ def main():
         "strategies": strategies,
         "generated_at": datetime.now().isoformat()
     }
-    
+
     report_dir = "reports/strategy_backtest"
     os.makedirs(report_dir, exist_ok=True)
     report_file = f"{report_dir}/strategy_backtest_{datetime.now().strftime('%Y%m')}.json"
-    
+
     with open(report_file, 'w', encoding='utf-8') as f:
         json.dump(report, f, ensure_ascii=False, indent=2)
-    
+
     print(f"回测完成: {report_file}")
     print(f"测试策略: {len(strategies)}个")
     print(f"平均收益: {report['average_return']}")
     print(f"最佳策略: {report['best_strategy']['name']} ({report['best_strategy']['total_return']})")
-    
+
     for strategy in strategies:
         print(f"{strategy['status']} {strategy['name']}: {strategy['total_return']}收益")
 

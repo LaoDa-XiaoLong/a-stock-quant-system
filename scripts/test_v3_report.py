@@ -15,9 +15,9 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 def create_v3_sample_data():
     """创建V3版示例数据"""
-    
+
     today = datetime.now().strftime('%Y-%m-%d')
-    
+
     # 持仓股票数据（模拟真实场景，包含合理比例的超预期）
     sample_holdings = [
         {
@@ -112,7 +112,7 @@ def create_v3_sample_data():
             'is_holding': 1
         }
     ]
-    
+
     # 添加一些非持仓股票数据
     other_stocks = [
         {
@@ -140,7 +140,7 @@ def create_v3_sample_data():
             'is_holding': 0
         }
     ]
-    
+
     # 构建完整报告
     report = {
         'date': today,
@@ -153,7 +153,7 @@ def create_v3_sample_data():
         'holdings': sample_holdings,
         'all_stocks': sample_holdings + other_stocks
     }
-    
+
     return report
 
 
@@ -162,23 +162,23 @@ def test_v3_core_summary():
     print("=" * 70)
     print("📋 测试V3版核心摘要生成")
     print("=" * 70)
-    
+
     from send_financial_report_v3 import FinancialReportSenderV3
-    
+
     # 创建发送器实例
     sender = FinancialReportSenderV3()
-    
+
     # 创建示例报告
     report = create_v3_sample_data()
-    
+
     # 生成核心摘要
     core_summary = sender.generate_core_summary(report)
-    
+
     print("\n📱 V3版核心摘要预览:")
     print("-" * 50)
     print(core_summary)
     print("-" * 50)
-    
+
     # 检查重点突出
     print("\n🎯 重点突出检查:")
     checks = [
@@ -187,11 +187,11 @@ def test_v3_core_summary():
         ("图标系统", "📈" in core_summary or "📉" in core_summary, "✅ 使用图标系统"),
         ("数据警示", "数据合理性警示" in core_summary, "✅ 包含数据警示")
     ]
-    
+
     for check_name, check_result, message in checks:
         status = "✅" if check_result else "❌"
         print(f"{status} {check_name}: {message}")
-    
+
     return core_summary
 
 
@@ -200,11 +200,11 @@ def test_v3_stock_analysis():
     print("\n" + "=" * 70)
     print("📊 测试V3版股票综合分析")
     print("=" * 70)
-    
+
     from send_financial_report_v3 import FinancialReportSenderV3
-    
+
     sender = FinancialReportSenderV3()
-    
+
     # 测试单只股票分析
     sample_stock = {
         'stock_code': '002594',
@@ -219,14 +219,14 @@ def test_v3_stock_analysis():
         'trading_advice': '营收超预期显著',
         'is_holding': 1
     }
-    
+
     analysis = sender.generate_stock_analysis(sample_stock)
-    
+
     print("\n📄 单只股票综合分析预览:")
     print("-" * 50)
     print(analysis)
     print("-" * 50)
-    
+
     # 检查综合性
     print("\n🎯 综合性检查:")
     checks = [
@@ -239,11 +239,11 @@ def test_v3_stock_analysis():
         ("颜色标记", "font color=" in analysis, "✅ 使用颜色标记"),
         ("持仓标记", "🎯" in analysis, "✅ 包含持仓标记")
     ]
-    
+
     for check_name, check_result, message in checks:
         status = "✅" if check_result else "❌"
         print(f"{status} {check_name}: {message}")
-    
+
     return analysis
 
 
@@ -252,18 +252,18 @@ def test_v3_data_quality_check():
     print("\n" + "=" * 70)
     print("🔍 测试V3版数据合理性检查")
     print("=" * 70)
-    
+
     from send_financial_report_v3 import FinancialReportSenderV3
-    
+
     sender = FinancialReportSenderV3()
     report = create_v3_sample_data()
-    
+
     # 手动添加一些数据质量问题
     report['data_quality_score'] = 75.0  # 较低的质量分数
-    
+
     # 检查数据质量问题
     issues = sender._check_data_quality_issues(report)
-    
+
     print("\n📊 数据合理性检查结果:")
     if issues:
         print(f"发现 {len(issues)} 个数据质量问题:")
@@ -276,7 +276,7 @@ def test_v3_data_quality_check():
                 print(f"   改进建议: {', '.join(issue['suggestions'])}")
     else:
         print("✅ 未发现数据质量问题")
-    
+
     # 测试极端值检查
     print("\n⚡ 极端值检查测试:")
     extreme_stock = {
@@ -291,12 +291,12 @@ def test_v3_data_quality_check():
         'data_quality_score': 100,
         'is_holding': 0
     }
-    
+
     test_report = {'market_stats': {'extreme_values': []}}
     # 这里简化测试，实际应该调用完整的方法
-    
+
     print("✅ 极端值检查逻辑就绪")
-    
+
     return issues
 
 
@@ -305,11 +305,11 @@ def test_v3_formatting_system():
     print("\n" + "=" * 70)
     print("🎨 测试V3版格式化系统")
     print("=" * 70)
-    
+
     from send_financial_report_v3 import FinancialReportSenderV3
-    
+
     sender = FinancialReportSenderV3()
-    
+
     # 测试百分比格式化
     test_cases = [
         (0.30, "≥30%", "绿色加仓建议"),
@@ -320,12 +320,12 @@ def test_v3_formatting_system():
         (-0.15, "-20%--10%", "橙色关注风险"),
         (-0.25, "≤-20%", "红色考虑减仓")
     ]
-    
+
     print("📊 百分比格式化测试:")
     for value, expected_range, description in test_cases:
         formatted = sender._format_percentage(value)
         print(f"{value*100:+.1f}% ({description}): {formatted}")
-    
+
     # 测试交易建议生成
     print("\n💡 交易建议生成测试:")
     advice_cases = [
@@ -337,12 +337,12 @@ def test_v3_formatting_system():
         (-0.15, "关注风险"),
         (-0.25, "考虑减仓")
     ]
-    
+
     for ratio, expected_advice in advice_cases:
         stock = {'surprise_ratio': ratio}
         advice = sender._get_trading_advice(stock)
         print(f"{ratio*100:+.1f}% → {advice}")
-    
+
     return True
 
 
@@ -351,23 +351,23 @@ def preview_v3_full_report():
     print("\n" + "=" * 70)
     print("🚀 V3版完整报告预览")
     print("=" * 70)
-    
+
     from send_financial_report_v3 import FinancialReportSenderV3
-    
+
     sender = FinancialReportSenderV3()
     report = create_v3_sample_data()
-    
+
     print("\n📱 第一层：核心摘要")
     print("-" * 50)
     core = sender.generate_core_summary(report)
     print(core[:300] + "..." if len(core) > 300 else core)
-    
+
     print("\n⏳ 等待3秒...")
-    
+
     print("\n📄 第二层：详细综合分析")
     print("-" * 50)
     detailed = sender.generate_detailed_analysis(report)
-    
+
     # 显示各部分内容
     sections = detailed.split('## ')
     for i, section in enumerate(sections[:4]):  # 显示前4个部分
@@ -380,7 +380,7 @@ def preview_v3_full_report():
                     print(line)
             if len(lines) > 6:
                 print("...")
-    
+
     print("\n✅ V3版报告预览完成")
     print("• 解决综合性问题：每只股票一个综合段落")
     print("• 解决重点突出问题：颜色/图标/加粗系统")
@@ -396,7 +396,7 @@ def main():
     print("2. 重点不突出 → 颜色/图标/加粗系统")
     print("3. 数据合理性 → 识别并标注可疑数据")
     print("=" * 70)
-    
+
     try:
         # 运行各项测试
         test_v3_core_summary()
@@ -404,32 +404,32 @@ def main():
         test_v3_data_quality_check()
         test_v3_formatting_system()
         preview_v3_full_report()
-        
+
         print("\n" + "=" * 70)
         print("✅ V3版所有测试完成！")
         print("=" * 70)
-        
+
         print("\n🎯 V3版模板改进总结:")
         print("1. ✅ **综合性提升**：每只股票一个完整段落，综合多个指标")
         print("2. ✅ **重点突出优化**：颜色编码+图标系统+加粗强调")
         print("3. ✅ **数据合理性增强**：自动检查并标注可疑数据")
         print("4. ✅ **实用性改进**：明确的综合交易建议和行业分析")
         print("5. ✅ **风险控制**：数据质量警示和极端值提醒")
-        
+
         print("\n🔧 实施建议:")
         print("1. 立即部署V3版发送脚本")
         print("2. 更新调度任务配置")
         print("3. 监控数据合理性改进效果")
         print("4. 根据实际使用反馈持续优化")
-        
+
         print("\n📊 预期效果:")
         print("• 阅读体验：综合性分析，避免信息碎片化")
         print("• 决策支持：重点突出，快速识别关键信息")
         print("• 数据可信度：合理性检查，提高数据质量")
         print("• 用户体验：颜色/图标系统，提升视觉层次")
-        
+
         return True
-        
+
     except Exception as e:
         print(f"❌ 测试失败: {e}")
         import traceback

@@ -10,20 +10,20 @@ from typing import Dict, List
 
 class AdviceRiskAnalyzer:
     """建议风险分析器"""
-    
+
     def __init__(self):
         self.issues = []
-        
+
     def analyze_advice_logic(self):
         """分析建议生成逻辑的问题"""
         print("=" * 70)
         print("🔍 建议风险问题分析")
         print("=" * 70)
-        
+
         # 问题1: 基于错误数据给出激进建议
         print("\n1. 问题分析：基于错误数据给出激进建议")
         print("-" * 50)
-        
+
         # 模拟错误数据场景
         error_scenarios = [
             {
@@ -72,16 +72,16 @@ class AdviceRiskAnalyzer:
                 'problem': '数据质量分数低但未在建议中体现风险'
             }
         ]
-        
+
         for scenario in error_scenarios:
             print(f"\n📊 场景: {scenario['name']}")
             print(f"   数据: {scenario['stock']}")
             print(f"   问题: {scenario['problem']}")
-            
+
             # 分析建议生成逻辑
             advice = self._simulate_advice_generation(scenario['stock'])
             print(f"   当前逻辑建议: {advice}")
-            
+
             if "强烈推荐加仓" in advice:
                 print(f"   ❌ 风险: 基于错误数据给出激进建议")
                 self.issues.append({
@@ -92,11 +92,11 @@ class AdviceRiskAnalyzer:
                 })
             else:
                 print(f"   ✅ 安全: 建议相对保守")
-    
+
     def _simulate_advice_generation(self, stock: Dict) -> str:
         """模拟当前建议生成逻辑"""
         surprise_ratio = stock.get('surprise_ratio', 0)
-        
+
         # 当前逻辑（来自send_financial_report_v3_fixed.py）
         if surprise_ratio >= 0.30:  # ≥30%
             return "<font color='green'>✅ 强烈推荐加仓</font>"
@@ -110,12 +110,12 @@ class AdviceRiskAnalyzer:
             return "<font color='orange'>⚠️ 关注风险</font>"
         else:  # < -20%
             return "<font color='red'>🚨 考虑减仓</font>"
-    
+
     def analyze_data_validation(self):
         """分析数据验证前置条件"""
         print("\n2. 数据验证前置条件分析")
         print("-" * 50)
-        
+
         validation_checks = [
             {
                 'check': '实际值是否为0',
@@ -148,25 +148,25 @@ class AdviceRiskAnalyzer:
                 'solution': '验证required_fields完整性'
             }
         ]
-        
+
         for check in validation_checks:
             print(f"   ✅ {check['check']}:")
             print(f"      重要性: {check['importance']}")
             print(f"      风险: {check['risk']}")
             print(f"      解决方案: {check['solution']}")
-    
+
     def propose_fixed_advice_logic(self):
         """提出修复后的建议生成算法"""
         print("\n3. 修复后的建议生成算法设计")
         print("-" * 50)
-        
+
         print("""
 class FixedAdviceGenerator:
     def __init__(self):
         self.min_data_quality = 80  # 最低数据质量分数
         self.max_surprise_ratio = 1.0  # 最大超预期比例
         self.min_valid_value = 1  # 最小有效数值
-        
+
     def validate_data(self, stock: Dict) -> Tuple[bool, str]:
         '''数据验证前置检查'''
         # 1. 检查数据完整性
@@ -174,36 +174,36 @@ class FixedAdviceGenerator:
         for field in required_fields:
             if field not in stock:
                 return False, f"缺失必要字段: {field}"
-        
+
         # 2. 检查数值有效性
         if stock['actual_value'] == 0:
             return False, "实际值为0，数据异常"
         if stock['expected_value'] == 0:
             return False, "预期值为0，数据异常"
-        
+
         # 3. 检查数据质量
         if stock['data_quality_score'] < self.min_data_quality:
             return False, f"数据质量分数过低: {stock['data_quality_score']}"
-        
+
         # 4. 检查超预期比例合理性
         if abs(stock['surprise_ratio']) > self.max_surprise_ratio:
             return False, f"超预期比例异常: {stock['surprise_ratio']}"
-        
+
         return True, "数据验证通过"
-    
+
     def get_trading_advice(self, stock: Dict) -> str:
         '''修复后的交易建议生成'''
         # 数据验证
         is_valid, message = self.validate_data(stock)
         if not is_valid:
             return f"<font color='red'>⚠️ 数据异常: {message}</font>"
-        
+
         surprise_ratio = stock['surprise_ratio']
         data_quality = stock['data_quality_score']
-        
+
         # 根据数据质量调整建议强度
         quality_factor = data_quality / 100.0
-        
+
         if surprise_ratio >= 0.30 * quality_factor:
             advice = "强烈推荐加仓"
             color = "green"
@@ -222,19 +222,19 @@ class FixedAdviceGenerator:
         else:
             advice = "考虑减仓"
             color = "red"
-        
+
         # 添加数据质量提示
         if data_quality < 90:
             advice = f"{advice} (数据质量: {data_quality}分)"
-        
+
         return f"<font color='{color}'>✅ {advice}</font>"
 """)
-    
+
     def design_risk_warning_mechanism(self):
         """设计风险提示机制"""
         print("\n4. 风险提示机制设计")
         print("-" * 50)
-        
+
         print("""
 风险提示机制设计：
 1. 数据异常警告系统
@@ -259,12 +259,12 @@ class FixedAdviceGenerator:
    - "建议结合其他信息源验证"
    - "建议等待下个报告期确认"
 """)
-    
+
     def create_test_cases(self):
         """创建测试验证用例"""
         print("\n5. 测试验证用例")
         print("-" * 50)
-        
+
         test_cases = [
             {
                 'name': '正常高质量数据',
@@ -311,37 +311,37 @@ class FixedAdviceGenerator:
                 'should_pass': False
             }
         ]
-        
+
         for test in test_cases:
             status = "✅" if test['should_pass'] else "❌"
             print(f"{status} {test['name']}:")
             print(f"   数据: {test['stock']}")
             print(f"   预期结果: {test['expected']}")
-    
+
     def generate_report(self):
         """生成分析报告"""
         print("\n" + "=" * 70)
         print("📋 建议风险问题分析报告")
         print("=" * 70)
-        
+
         print("\n🎯 核心问题总结:")
         print("1. 基于错误数据（如利润为0）给出激进投资建议")
         print("2. 缺乏数据验证前置检查")
         print("3. 风险提示机制不完善")
         print("4. 建议生成算法未考虑数据质量")
-        
+
         print("\n🔧 解决方案:")
         print("1. 添加数据验证前置条件")
         print("2. 修复建议生成算法")
         print("3. 完善风险提示机制")
         print("4. 优化建议内容和格式")
-        
+
         print("\n🚀 实施计划:")
         print("1. 立即修复数据验证逻辑")
         print("2. 更新建议生成算法")
         print("3. 添加风险提示系统")
         print("4. 创建测试用例验证修复效果")
-        
+
         if self.issues:
             print("\n⚠️ 发现的具体问题:")
             for issue in self.issues:
@@ -352,7 +352,7 @@ class FixedAdviceGenerator:
 def main():
     """主函数"""
     analyzer = AdviceRiskAnalyzer()
-    
+
     # 执行分析
     analyzer.analyze_advice_logic()
     analyzer.analyze_data_validation()
@@ -360,7 +360,7 @@ def main():
     analyzer.design_risk_warning_mechanism()
     analyzer.create_test_cases()
     analyzer.generate_report()
-    
+
     print("\n" + "=" * 70)
     print("✅ 分析完成！")
     print("=" * 70)

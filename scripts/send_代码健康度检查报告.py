@@ -14,7 +14,7 @@ from datetime import datetime
 def send_to_feishu_group(content, title):
     """发送到飞书群"""
     webhook_url = "https://open.feishu.cn/open-apis/bot/v2/hook/7c6e2bb9-0f2f-4d16-ade1-e93cf6bd3065"
-    
+
     message = {
         "msg_type": "interactive",
         "card": {
@@ -48,7 +48,7 @@ def send_to_feishu_group(content, title):
             ]
         }
     }
-    
+
     try:
         response = requests.post(webhook_url, json=message, timeout=10)
         if response.status_code == 200:
@@ -64,10 +64,10 @@ def send_to_feishu_group(content, title):
 def main():
     task_name = "代码健康度检查报告"
     target_group = "工作沟通汇报群"
-    
+
     print(f"🚀 开始发送{task_name}")
     print("=" * 60)
-    
+
     # 读取最新的代码健康度检查报告
     report_content = ""
     try:
@@ -82,7 +82,7 @@ def main():
             report_content = "未找到代码健康度检查报告文件"
     except Exception as e:
         report_content = f"读取报告文件时出错: {e}"
-    
+
     # 生成摘要内容
     content = f"""
 **任务名称**: {task_name}
@@ -105,27 +105,27 @@ def main():
 2. 为关键策略添加基础测试
 3. 清理重复代码和大型文件
 """
-    
+
     success = send_to_feishu_group(content, task_name)
-    
+
     if success:
         # 记录日志
         log_dir = "/Users/ago/.openclaw/workspace/logs/group_notifications"
         os.makedirs(log_dir, exist_ok=True)
         log_file = os.path.join(log_dir, f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{task_name.replace(' ', '_')}.json")
-        
+
         log_data = {
             "task": task_name,
             "timestamp": datetime.now().isoformat(),
             "target_group": target_group,
             "status": "success"
         }
-        
+
         with open(log_file, 'w', encoding='utf-8') as f:
             json.dump(log_data, f, ensure_ascii=False, indent=2)
-        
+
         print(f"✅ 发送日志已保存: {log_file}")
-    
+
     return success
 
 if __name__ == "__main__":

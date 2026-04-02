@@ -14,62 +14,62 @@ def select_investment_stocks():
     """选择值得投资的股票"""
     print('🎯 选择值得投资的股票并分析进场点位')
     print('=' * 60)
-    
+
     # 读取最新的筛选结果
     screening_file = 'data/stock_pool/screening_results_20260331_093829.json'
-    
+
     if not os.path.exists(screening_file):
         print('⚠️ 未找到筛选结果文件')
         return []
-    
+
     with open(screening_file, 'r', encoding='utf-8') as f:
         data = json.load(f)
-    
+
     # 选择标准：评分高 + 今日表现良好
     stocks = data['stocks']
-    
+
     # 过滤条件
     selected_stocks = []
     for stock in stocks:
         # 选择评分85以上且今日涨跌在-2%到+5%之间的
         if stock['score'] >= 85 and -2 <= stock['change_pct'] <= 5:
             selected_stocks.append(stock)
-    
+
     # 按评分排序，取前5只
     selected_stocks = sorted(selected_stocks, key=lambda x: x['score'], reverse=True)[:5]
-    
+
     print(f'从{len(stocks)}只股票中筛选出{len(selected_stocks)}只值得投资的股票:')
     print()
-    
+
     investment_stocks = []
     for i, stock in enumerate(selected_stocks, 1):
         print(f'{i}. {stock["code"]} {stock["name"]}')
         print(f'   综合评分: {stock["score"]}/100')
         print(f'   今日涨跌: {stock["change_pct"]:.2f}%')
         print(f'   入选理由: {stock["selection_reason"]}')
-        
+
         # 分析进场点位（模拟价格）
         base_price = 8.0 + (stock['score'] - 85) * 0.3
-        
+
         if stock['change_pct'] > 0:
             current_price = base_price * (1 + stock['change_pct'] / 100 * 0.8)
         else:
             current_price = base_price * (1 + stock['change_pct'] / 100 * 1.2)
-        
+
         current_price = round(current_price, 2)
-        
+
         # 进场策略
         entry_strategy = {
             '激进进场': round(current_price * 0.99, 2),
             '稳健进场': round(current_price * 0.97, 2),
             '保守进场': round(current_price * 0.95, 2),
         }
-        
+
         # 风险控制
         stop_loss = round(current_price * 0.92, 2)
         take_profit_1 = round(current_price * 1.08, 2)
         take_profit_2 = round(current_price * 1.15, 2)
-        
+
         print(f'   模拟当前价格: {current_price}元')
         print(f'   建议进场点位:')
         print(f'     - 激进: {entry_strategy["激进进场"]}元')
@@ -80,7 +80,7 @@ def select_investment_stocks():
         print(f'     - 止盈1: {take_profit_1}元')
         print(f'     - 止盈2: {take_profit_2}元')
         print()
-        
+
         investment_stocks.append({
             'code': stock['code'],
             'name': stock['name'],
@@ -101,23 +101,23 @@ def select_investment_stocks():
             'profit_loss': 0,
             'profit_loss_pct': 0
         })
-    
+
     return investment_stocks
 
 def create_tracking_files(investment_stocks):
     """创建跟踪文件"""
     print('📊 创建股票投资跟踪文件')
     print('=' * 60)
-    
+
     # 创建跟踪目录
     tracking_dir = 'data/investment_tracking'
     os.makedirs(tracking_dir, exist_ok=True)
-    
+
     today = datetime.now().strftime('%Y-%m-%d')
-    
+
     # 1. 创建投资组合文件
     portfolio_file = f'{tracking_dir}/investment_portfolio.json'
-    
+
     portfolio = {
         'created_date': today,
         'last_updated': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
@@ -128,15 +128,15 @@ def create_tracking_files(investment_stocks):
         'total_profit_loss_pct': 0,
         'stocks': investment_stocks
     }
-    
+
     with open(portfolio_file, 'w', encoding='utf-8') as f:
         json.dump(portfolio, f, ensure_ascii=False, indent=2)
-    
+
     print(f'✅ 投资组合文件: {portfolio_file}')
-    
+
     # 2. 创建今日复盘报告
     review_file = f'{tracking_dir}/daily_review_{today}.md'
-    
+
     review_content = f"""# 股票投资每日复盘报告
 ## 报告日期: {today}
 ## 生成时间: {datetime.now().strftime('%H:%M:%S')}
@@ -150,7 +150,7 @@ def create_tracking_files(investment_stocks):
 ## 二、今日选股详情
 
 """
-    
+
     for i, stock in enumerate(investment_stocks, 1):
         review_content += f"""### {i}. {stock['code']} {stock['name']}
 - **综合评分**: {stock['score']}/100
@@ -158,7 +158,7 @@ def create_tracking_files(investment_stocks):
 - **模拟价格**: {stock['current_price']}元
 - **进场策略**:
   - 激进: {stock['entry_strategy']['激进进场']}元
-  - 稳健: {stock['entry_strategy']['稳健进场']}元  
+  - 稳健: {stock['entry_strategy']['稳健进场']}元
   - 保守: {stock['entry_strategy']['保守进场']}元
 - **风险控制**:
   - 止损: {stock['stop_loss']}元
@@ -173,7 +173,7 @@ def create_tracking_files(investment_stocks):
 3. 设置止损止盈
 
 """
-    
+
     review_content += f"""
 ## 三、市场分析
 - **上证指数**: 3923.29点 (+0.24%)
@@ -196,15 +196,15 @@ def create_tracking_files(investment_stocks):
 - 止损位: -8%
 - 止盈位: +8% (第一目标), +15% (第二目标)
 """
-    
+
     with open(review_file, 'w', encoding='utf-8') as f:
         f.write(review_content)
-    
+
     print(f'✅ 今日复盘报告: {review_file}')
-    
+
     # 3. 创建自动跟踪脚本
     script_file = f'{tracking_dir}/update_tracking.py'
-    
+
     script_content = '''#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -220,19 +220,19 @@ def update_portfolio():
     """更新投资组合"""
     tracking_dir = 'data/investment_tracking'
     portfolio_file = f'{tracking_dir}/investment_portfolio.json'
-    
+
     if not os.path.exists(portfolio_file):
         print('❌ 投资组合文件不存在')
         return
-    
+
     with open(portfolio_file, 'r', encoding='utf-8') as f:
         portfolio = json.load(f)
-    
+
     today = datetime.now().strftime('%Y-%m-%d')
-    
+
     print(f'📊 更新投资组合 ({today})')
     print('=' * 50)
-    
+
     # 模拟更新价格（实际应从数据源获取）
     for stock in portfolio['stocks']:
         if stock['status'] == '已进场' and stock['entry_price']:
@@ -240,42 +240,42 @@ def update_portfolio():
             import random
             price_change = random.uniform(-0.03, 0.05)  # -3%到+5%
             current_price = round(stock['entry_price'] * (1 + price_change), 2)
-            
+
             # 计算盈亏
             if stock['current_position'] > 0:
                 profit_loss = (current_price - stock['entry_price']) * stock['current_position']
                 profit_loss_pct = (current_price - stock['entry_price']) / stock['entry_price'] * 100
-                
+
                 stock['current_price'] = current_price
                 stock['profit_loss'] = round(profit_loss, 2)
                 stock['profit_loss_pct'] = round(profit_loss_pct, 2)
-                
+
                 print(f'{stock["code"]} {stock["name"]}:')
                 print(f'  当前价: {current_price}元, 盈亏: {stock["profit_loss"]}元 ({stock["profit_loss_pct"]:.2f}%)')
-    
+
     # 更新总览
     portfolio['last_updated'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    
+
     with open(portfolio_file, 'w', encoding='utf-8') as f:
         json.dump(portfolio, f, ensure_ascii=False, indent=2)
-    
+
     print('✅ 投资组合已更新')
 
 def record_transaction(stock_code, action, price, quantity, date=None):
     """记录交易"""
     if date is None:
         date = datetime.now().strftime('%Y-%m-%d')
-    
+
     tracking_dir = 'data/investment_tracking'
     portfolio_file = f'{tracking_dir}/investment_portfolio.json'
-    
+
     if not os.path.exists(portfolio_file):
         print('❌ 投资组合文件不存在')
         return
-    
+
     with open(portfolio_file, 'r', encoding='utf-8') as f:
         portfolio = json.load(f)
-    
+
     # 找到对应的股票
     for stock in portfolio['stocks']:
         if stock['code'] == stock_code:
@@ -290,18 +290,18 @@ def record_transaction(stock_code, action, price, quantity, date=None):
                 stock['status'] = '已平仓'
                 profit = (price - stock['entry_price']) * quantity
                 print(f'✅ 记录卖出: {stock_code} {price}元, 盈利: {profit:.2f}元')
-            
+
             break
-    
+
     # 保存更新
     with open(portfolio_file, 'w', encoding='utf-8') as f:
         json.dump(portfolio, f, ensure_ascii=False, indent=2)
-    
+
     print('✅ 交易记录已保存')
 
 if __name__ == '__main__':
     import sys
-    
+
     if len(sys.argv) > 1:
         if sys.argv[1] == 'update':
             update_portfolio()
@@ -317,29 +317,29 @@ if __name__ == '__main__':
     else:
         update_portfolio()
 '''
-    
+
     with open(script_file, 'w', encoding='utf-8') as f:
         f.write(script_content)
-    
+
     # 设置执行权限
     os.chmod(script_file, 0o755)
-    
+
     print(f'✅ 自动跟踪脚本: {script_file}')
-    
+
     return True
 
 def main():
     """主函数"""
     # 选择投资股票
     stocks = select_investment_stocks()
-    
+
     if not stocks:
         print('❌ 未选择到合适的投资股票')
         return
-    
+
     # 创建跟踪文件
     success = create_tracking_files(stocks)
-    
+
     if success:
         print('=' * 60)
         print('🎉 股票投资跟踪系统创建完成！')

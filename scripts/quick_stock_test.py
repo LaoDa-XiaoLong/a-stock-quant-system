@@ -9,7 +9,7 @@ from datetime import datetime
 
 def main():
     print("快速测试akshare股票数据...")
-    
+
     # 测试1: 获取股票列表
     print("\n1. 测试股票列表获取...")
     try:
@@ -18,7 +18,7 @@ def main():
         print(f"   前3只股票: {stock_list.head(3).to_dict('records')}")
     except Exception as e:
         print(f"   失败: {e}")
-    
+
     # 测试2: 获取指数数据
     print("\n2. 测试指数数据获取...")
     try:
@@ -27,7 +27,7 @@ def main():
         print(f"   最新日期: {index_data.iloc[-1]['date'] if 'date' in index_data.columns else 'N/A'}")
     except Exception as e:
         print(f"   失败: {e}")
-    
+
     # 测试3: 获取单只股票历史数据
     print("\n3. 测试单只股票历史数据...")
     try:
@@ -36,7 +36,7 @@ def main():
         print(f"   列名: {stock_data.columns.tolist()}")
     except Exception as e:
         print(f"   失败: {e}")
-    
+
     print("\n测试完成!")
 
 if __name__ == "__main__":

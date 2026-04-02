@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 class ToolUsageFixer:
     """工具使用修复器"""
-    
+
     def __init__(self):
         self.common_errors = {
             'edit_failed_exact_match': {
@@ -39,44 +39,44 @@ class ToolUsageFixer:
                 'fix_method': 'simplify_message_format'
             }
         }
-        
+
         logger.info("工具使用修复器初始化完成")
-    
+
     def analyze_error_log(self, error_log: str) -> List[Dict]:
         """分析错误日志"""
         errors = []
-        
+
         for error_type, error_info in self.common_errors.items():
             pattern = error_info['pattern']
             matches = re.findall(pattern, error_log)
-            
+
             for match in matches:
                 if isinstance(match, tuple):
                     # 多个捕获组的情况
                     details = ' '.join([str(m) for m in match if m])
                 else:
                     details = match
-                
+
                 errors.append({
                     'type': error_type,
                     'details': details,
                     'solution': error_info['solution'],
                     'fix_method': error_info['fix_method']
                 })
-        
+
         return errors
-    
+
     def generate_fix_report(self, errors: List[Dict]) -> str:
         """生成修复报告"""
         if not errors:
             return "✅ 未发现需要修复的错误"
-        
+
         report_lines = []
         report_lines.append("=" * 60)
         report_lines.append("工具使用错误分析报告")
         report_lines.append(f"发现错误数量: {len(errors)}")
         report_lines.append("=" * 60)
-        
+
         # 按错误类型分组
         error_groups = {}
         for error in errors:
@@ -84,43 +84,43 @@ class ToolUsageFixer:
             if error_type not in error_groups:
                 error_groups[error_type] = []
             error_groups[error_type].append(error)
-        
+
         # 输出每种错误的详细信息
         for error_type, error_list in error_groups.items():
             report_lines.append(f"\n📋 {error_type.replace('_', ' ').title()}:")
             report_lines.append(f"  数量: {len(error_list)}")
             report_lines.append(f"  解决方案: {error_list[0]['solution']}")
-            
+
             # 显示前3个错误的详细信息
             for i, error in enumerate(error_list[:3]):
                 report_lines.append(f"  {i+1}. {error['details']}")
-            
+
             if len(error_list) > 3:
                 report_lines.append(f"  ... 还有{len(error_list)-3}个类似错误")
-        
+
         # 总体建议
         report_lines.append("\n💡 总体修复建议:")
-        
+
         if any(e['type'] == 'edit_failed_exact_match' for e in errors):
             report_lines.append("1. 📝 文件编辑问题:")
             report_lines.append("   • 使用更精确的文本匹配")
             report_lines.append("   • 先读取文件内容确认要编辑的部分")
             report_lines.append("   • 考虑使用write工具替代复杂编辑")
             report_lines.append("   • 建立文件版本快照机制")
-        
+
         if any(e['type'] == 'edit_failed_not_unique' for e in errors):
             report_lines.append("2. 🔍 文本不唯一问题:")
             report_lines.append("   • 提供更多上下文使匹配文本唯一")
             report_lines.append("   • 使用行号或特定标识符")
             report_lines.append("   • 考虑使用正则表达式匹配")
-        
+
         if any(e['type'] == 'http_400_error' for e in errors):
             report_lines.append("3. 🌐 HTTP 400错误:")
             report_lines.append("   • 简化消息格式，避免复杂卡片")
             report_lines.append("   • 检查飞书API权限配置")
             report_lines.append("   • 使用纯文本消息替代卡片消息")
             report_lines.append("   • 建立消息格式验证机制")
-        
+
         # 最佳实践
         report_lines.append("\n🚀 工具使用最佳实践:")
         report_lines.append("1. 精确匹配: 编辑前先确认文件内容和格式")
@@ -128,11 +128,11 @@ class ToolUsageFixer:
         report_lines.append("3. 简化操作: 复杂编辑分步进行，使用write工具")
         report_lines.append("4. 错误处理: 添加适当的错误处理和重试机制")
         report_lines.append("5. 日志记录: 详细记录工具使用情况便于调试")
-        
+
         report_lines.append("\n" + "=" * 60)
-        
+
         return '\n'.join(report_lines)
-    
+
     def create_edit_helper_script(self) -> str:
         """创建编辑助手脚本"""
         script_content = '''#!/usr/bin/env python3
@@ -150,11 +150,11 @@ def read_file_safely(filepath: str, lines_before: int = 5, lines_after: int = 5)
     try:
         with open(filepath, 'r', encoding='utf-8') as f:
             content = f.read()
-        
+
         # 如果文件太大，只显示部分
         if len(content) > 10000:
             return f"文件过大 ({len(content)} 字符)，建议直接查看文件"
-        
+
         return content
     except Exception as e:
         return f"读取文件失败: {e}"
@@ -163,22 +163,22 @@ def find_text_with_context(content: str, search_text: str, context_lines: int = 
     """查找文本并显示上下文"""
     lines = content.split('\\n')
     matches = []
-    
+
     for i, line in enumerate(lines):
         if search_text in line:
             start = max(0, i - context_lines)
             end = min(len(lines), i + context_lines + 1)
-            
+
             context = []
             for j in range(start, end):
                 prefix = '>>> ' if j == i else '    '
                 context.append(f"{prefix}{lines[j]}")
-            
+
             matches.append({
                 'line_number': i + 1,
                 'context': '\\n'.join(context)
             })
-    
+
     return matches
 
 def verify_edit_parameters(filepath: str, old_text: str) -> dict:
@@ -189,12 +189,12 @@ def verify_edit_parameters(filepath: str, old_text: str) -> dict:
         'suggestions': [],
         'matches': []
     }
-    
+
     # 1. 检查文件是否存在
     if not os.path.exists(filepath):
         result['issues'].append(f"文件不存在: {filepath}")
         return result
-    
+
     # 2. 读取文件内容
     try:
         with open(filepath, 'r', encoding='utf-8') as f:
@@ -202,10 +202,10 @@ def verify_edit_parameters(filepath: str, old_text: str) -> dict:
     except Exception as e:
         result['issues'].append(f"无法读取文件: {e}")
         return result
-    
+
     # 3. 查找匹配
     matches = find_text_with_context(content, old_text)
-    
+
     if not matches:
         result['issues'].append(f"未找到文本: {old_text}")
         result['suggestions'].append("检查文本是否完全匹配（包括空格和换行）")
@@ -214,7 +214,7 @@ def verify_edit_parameters(filepath: str, old_text: str) -> dict:
         result['issues'].append(f"找到{len(matches)}个匹配，文本不唯一")
         result['suggestions'].append("提供更多上下文使文本唯一")
         result['suggestions'].append("考虑使用行号或特定标识符")
-        
+
         # 显示前3个匹配
         for i, match in enumerate(matches[:3]):
             result['matches'].append(f"匹配 #{i+1} (第{match['line_number']}行):")
@@ -224,7 +224,7 @@ def verify_edit_parameters(filepath: str, old_text: str) -> dict:
         result['suggestions'].append("✅ 文本匹配成功，可以安全编辑")
         result['matches'].append(f"找到匹配 (第{matches[0]['line_number']}行):")
         result['matches'].append(matches[0]['context'])
-    
+
     return result
 
 def main():
@@ -233,33 +233,33 @@ def main():
         print("用法: python edit_helper.py <文件路径> <要查找的文本>")
         print("示例: python edit_helper.py script.py 'def test_function'")
         sys.exit(1)
-    
+
     filepath = sys.argv[1]
     search_text = sys.argv[2]
-    
+
     print(f"🔍 检查编辑参数:")
     print(f"   文件: {filepath}")
     print(f"   文本: '{search_text}'")
     print()
-    
+
     result = verify_edit_parameters(filepath, search_text)
-    
+
     if result['is_valid']:
         print("✅ 验证通过，可以安全编辑")
     else:
         print("❌ 验证失败，发现问题:")
         for issue in result['issues']:
             print(f"   • {issue}")
-    
+
     print()
-    
+
     if result['suggestions']:
         print("💡 建议:")
         for suggestion in result['suggestions']:
             print(f"   {suggestion}")
-    
+
     print()
-    
+
     if result['matches']:
         print("📄 匹配结果:")
         for match in result['matches']:
@@ -268,9 +268,9 @@ def main():
 if __name__ == "__main__":
     main()
 '''
-        
+
         return script_content
-    
+
     def create_best_practices_guide(self) -> str:
         """创建最佳实践指南"""
         guide = '''# 工具使用最佳实践指南
@@ -404,7 +404,7 @@ def safe_edit(filepath, oldText, newText):
     logging.debug(f"编辑文件: {filepath}")
     logging.debug(f"旧文本长度: {len(oldText)}")
     logging.debug(f"新文本长度: {len(newText)}")
-    
+
     try:
         edit(filepath, oldText, newText)
         logging.info("编辑成功")
@@ -418,15 +418,15 @@ def safe_edit(filepath, oldText, newText):
 def verify_edit(filepath, expected_old, expected_new):
     """验证编辑结果"""
     content = read(filepath)
-    
+
     if expected_old in content:
         print(f"❌ 旧文本仍然存在")
         return False
-    
+
     if expected_new not in content:
         print(f"❌ 新文本未找到")
         return False
-    
+
     print("✅ 编辑验证通过")
     return True
 ```
@@ -462,14 +462,14 @@ def verify_edit(filepath, expected_old, expected_new):
 
 记住：**预防优于修复**，在工具使用前多花一分钟检查，可以节省后续数小时的调试时间。
 '''
-        
+
         return guide
 
 
 def main():
     """主函数"""
     print("工具使用修复器启动...")
-    
+
     # 示例错误日志（从用户提供的信息）
     error_log = """
 17:47:09 error [tools] edit failed: Could not find the exact text in scripts/data_quality_validator.py. The old text must match exactly including all whitespace and newlines.
@@ -484,39 +484,39 @@ def main():
 18:16:56 error [tools] edit failed: Could not find the exact text in skills/feishu-messenger/feishu_messenger.py. The old text must match exactly including all whitespace and newlines.
 18:21:16 error gateway/channels/feishu feishu: streaming start failed: Error: Create card request failed with HTTP 400
 """
-    
+
     fixer = ToolUsageFixer()
-    
+
     # 分析错误日志
     errors = fixer.analyze_error_log(error_log)
-    
+
     # 生成修复报告
     report = fixer.generate_fix_report(errors)
     print(report)
-    
+
     # 创建编辑助手脚本
     print("\n" + "=" * 60)
     print("创建编辑助手脚本...")
     edit_helper = fixer.create_edit_helper_script()
-    
+
     helper_path = "scripts/edit_helper.py"
     with open(helper_path, 'w', encoding='utf-8') as f:
         f.write(edit_helper)
-    
+
     print(f"✅ 编辑助手脚本已保存: {helper_path}")
     print("用法: python3 scripts/edit_helper.py <文件路径> <要查找的文本>")
-    
+
     # 创建最佳实践指南
     print("\n" + "=" * 60)
     print("创建最佳实践指南...")
     best_practices = fixer.create_best_practices_guide()
-    
+
     guide_path = "docs/tool_usage_best_practices.md"
     with open(guide_path, 'w', encoding='utf-8') as f:
         f.write(best_practices)
-    
+
     print(f"✅ 最佳实践指南已保存: {guide_path}")
-    
+
     # 总结
     print("\n" + "=" * 60)
     print("🎯 下一步行动:")

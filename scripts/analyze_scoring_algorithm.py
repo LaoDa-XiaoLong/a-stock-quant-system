@@ -136,7 +136,7 @@ print("=" * 70)
 def improved_scoring_algorithm(stock_data):
     """改进的评分算法示例"""
     score = 0
-    
+
     # 1. 价格因素 (20%)
     price = stock_data.get('price', 10)
     if 5 <= price <= 20:
@@ -147,7 +147,7 @@ def improved_scoring_algorithm(stock_data):
         score += 10
     else:
         score += 5
-    
+
     # 2. 涨跌因素 (30%)
     change = stock_data.get('change_pct', 0)
     if -2 <= change <= 2:
@@ -158,20 +158,20 @@ def improved_scoring_algorithm(stock_data):
         score += 20
     else:
         score += 10
-    
+
     # 3. 市值因素 (20%) - 模拟数据
     # 实际应从数据源获取市值
     market_cap_score = 15  # 默认中等市值
     score += market_cap_score
-    
+
     # 4. 行业因素 (15%) - 模拟数据
     industry_score = 12  # 默认中等行业
     score += industry_score
-    
+
     # 5. 流动性因素 (15%) - 模拟数据
     liquidity_score = 10  # 默认中等流动性
     score += liquidity_score
-    
+
     # 确保在0-100范围内
     return min(max(score, 0), 100)
 
@@ -189,7 +189,7 @@ for stock in test_stocks:
     old_score = next((s['score'] for s in stocks if s['code'] == stock['code']), 0)
     new_score = improved_scoring_algorithm(stock)
     diff = new_score - old_score
-    
+
     print(f"   {stock['code']} {stock['name']:10s}")
     print(f"     原评分: {old_score:3d}分，新评分: {new_score:3d}分，变化: {diff:+d}分")
     print(f"     价格: {stock['price']:6.2f}元，涨跌: {stock['change_pct']:+.2f}%")
@@ -283,9 +283,9 @@ report_content = f"""# 📊 股票评分算法详细分析报告
 3. **涨跌因素**: 根据涨跌幅稳定性加分
 
 ### 1.2 评分结果分析
-- **评分分布**: 
+- **评分分布**:
   - 70-79分: {len([s for s in scores if 70 <= s < 80])}只
-  - 80-89分: {len([s for s in scores if 80 <= s < 90])}只  
+  - 80-89分: {len([s for s in scores if 80 <= s < 90])}只
   - 90-100分: {len([s for s in scores if s >= 90])}只
 - **评分与涨跌相关性**: {correlation:.3f}
 - **评分标准差**: {np.std(scores):.1f}分
@@ -328,10 +328,10 @@ for stock in test_stocks:
     old_score = next((s['score'] for s in stocks if s['code'] == stock['code']), 0)
     new_score = improved_scoring_algorithm(stock)
     diff = new_score - old_score
-    
+
     report_content += f"""#### {stock['code']} {stock['name']}
 - 原评分: {old_score}分
-- 新评分: {new_score}分  
+- 新评分: {new_score}分
 - 变化: {diff:+d}分
 - 价格: {stock['price']:.2f}元
 - 今日涨跌: {stock['change_pct']:+.2f}%

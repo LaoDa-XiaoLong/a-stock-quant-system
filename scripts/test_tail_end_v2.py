@@ -17,9 +17,9 @@ def test_v2_strategy():
     """测试v2.0策略"""
     print("测试尾盘选股策略 v2.0")
     print("=" * 60)
-    
+
     selector = TailEndStrategyV2()
-    
+
     # 测试时间判断
     print("时间窗口测试:")
     test_times = [
@@ -30,18 +30,18 @@ def test_v2_strategy():
         ("15:00", True, "尾盘结束"),
         ("15:30", False, "收盘后")
     ]
-    
+
     for time_str, expected, desc in test_times:
         test_time = datetime(2026, 4, 1, int(time_str[:2]), int(time_str[3:5]), 0)
         is_tail = selector.is_tail_end_time(test_time)
         status = "✅ 通过" if is_tail == expected else "❌ 失败"
         print(f"  {time_str} ({desc}): {status}")
-    
+
     print("\n" + "=" * 60)
-    
+
     # 测试选股逻辑
     print("选股逻辑测试:")
-    
+
     # 创建测试股票数据
     test_stocks = {
         "000001": {
@@ -105,24 +105,24 @@ def test_v2_strategy():
             }
         }
     }
-    
+
     print(f"\n分析 {len(test_stocks)} 只测试股票...")
-    
+
     # 模拟尾盘时间
     import time
     original_get_time = selector.get_current_time
-    
+
     def mock_tail_time():
         return datetime(2026, 4, 1, 14, 45, 0)
-    
+
     selector.get_current_time = mock_tail_time
-    
+
     try:
         # 运行选股
         selected = selector.apply_selection_criteria(test_stocks)
-        
+
         print(f"筛选结果: {len(selected)} 只股票符合条件")
-        
+
         if selected:
             print("\n筛选详情:")
             for stock in selected:
@@ -130,41 +130,41 @@ def test_v2_strategy():
                 print(f"  综合评分: {stock['score']}/100")
                 print(f"  当前价格: {stock['current_price']:.2f}元")
                 print(f"  今日涨跌: {stock['change_percent']:.2f}%")
-                
+
                 # 计算进场点位
                 risk_data = selector.calculate_tail_end_entry_points(stock)
                 print(f"  仓位建议: {risk_data['position_suggestion']}")
                 print(f"  风险收益比: {risk_data['risk_reward_ratio']:.2f}")
-                
+
                 print(f"  主要理由: {', '.join(stock['selection_reasons'][:3])}")
-        
+
         # 测试报告生成
         print("\n" + "=" * 60)
         print("报告生成测试:")
-        
+
         report = selector.generate_detailed_report(selected)
-        
+
         # 保存测试报告
         report_dir = "data/tail_end_selection_v2"
         os.makedirs(report_dir, exist_ok=True)
         report_path = os.path.join(report_dir, "test_report_v2.md")
-        
+
         with open(report_path, 'w', encoding='utf-8') as f:
             f.write(report)
-        
+
         print(f"测试报告已保存到: {report_path}")
-        
+
         # 显示报告摘要
         print("\n报告摘要:")
         lines = report.split('\n')[:20]
         for line in lines:
             print(line)
-        
+
         print("..." * 20)
-        
+
     finally:
         selector.get_current_time = original_get_time
-    
+
     return True
 
 def test_full_v2_selection():
@@ -172,27 +172,27 @@ def test_full_v2_selection():
     print("\n" + "=" * 60)
     print("测试完整尾盘选股流程 v2.0...")
     print("=" * 60)
-    
+
     selector = TailEndStrategyV2()
-    
+
     # 模拟尾盘时间
     import time
     original_get_time = selector.get_current_time
-    
+
     def mock_tail_time():
         return datetime(2026, 4, 1, 14, 45, 0)
-    
+
     selector.get_current_time = mock_tail_time
-    
+
     try:
         print("运行完整选股流程...")
         result = selector.run_selection()
-        
+
         if result:
             print("\n✅ 完整选股流程测试通过!")
             print(f"选股结果: {len(result['selected_stocks'])} 只股票")
             print(f"报告文件: {result['report_path']}")
-            
+
             # 显示选股结果摘要
             if result['selected_stocks']:
                 print("\n选股结果摘要:")
@@ -200,10 +200,10 @@ def test_full_v2_selection():
                     print(f"{i}. {stock['name']} ({stock['code']}) - {stock['score']}分")
         else:
             print("\n❌ 选股流程测试失败")
-            
+
     finally:
         selector.get_current_time = original_get_time
-    
+
     return True
 
 def main():
@@ -211,19 +211,19 @@ def main():
     print("尾盘选股策略 v2.0 测试套件")
     print("基于常见尾盘选股方法优化")
     print("=" * 60)
-    
+
     try:
         # 测试v2.0策略
         test_v2_strategy()
-        
+
         # 测试完整流程
         test_full_v2_selection()
-        
+
         print("\n" + "=" * 60)
         print("✅ 所有测试通过!")
         print("尾盘选股策略 v2.0 已准备就绪")
         print("=" * 60)
-        
+
         # 显示策略配置
         print("\n策略配置:")
         selector = TailEndStrategyV2()
@@ -231,13 +231,13 @@ def main():
         print(f"策略版本: {selector.strategy_version}")
         print(f"选股时间: {selector.selection_time}")
         print(f"策略权重: {selector.weights}")
-        
+
     except Exception as e:
         print(f"\n❌ 测试失败: {e}")
         import traceback
         traceback.print_exc()
         return False
-    
+
     return True
 
 if __name__ == "__main__":

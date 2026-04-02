@@ -22,7 +22,7 @@ for skill_dir in skill_dirs:
     skill_path = os.path.join('skills', skill_dir)
     if os.path.exists(skill_path):
         print(f"  ✅ {skill_dir}: 存在")
-        
+
         # 检查必要文件
         required_files = ['SKILL.md', 'README.md']
         for req_file in required_files:

@@ -17,9 +17,9 @@ def test_strategy_logic():
     """测试策略逻辑"""
     print("测试尾盘选股策略逻辑...")
     print("=" * 60)
-    
+
     selector = TailEndStockSelection()
-    
+
     # 测试时间判断
     test_times = [
         datetime(2026, 4, 1, 9, 30, 0),  # 早盘
@@ -29,18 +29,18 @@ def test_strategy_logic():
         datetime(2026, 4, 1, 15, 0, 0),  # 尾盘结束
         datetime(2026, 4, 1, 15, 30, 0)  # 收盘后
     ]
-    
+
     print("时间窗口测试:")
     for test_time in test_times:
         is_tail = selector.is_tail_end_time(test_time)
         status = "✅ 尾盘时间" if is_tail else "❌ 非尾盘时间"
         print(f"  {test_time.strftime('%H:%M:%S')}: {status}")
-    
+
     print("\n" + "=" * 60)
-    
+
     # 测试选股逻辑
     print("选股逻辑测试:")
-    
+
     # 模拟股票数据
     test_stocks = [
         {
@@ -90,53 +90,53 @@ def test_strategy_logic():
             }
         }
     ]
-    
+
     # 转换为策略需要的格式
     stock_data = {}
     for stock in test_stocks:
         stock_data[stock["code"]] = stock
-    
+
     print("\n应用选股标准:")
     selected = selector.apply_selection_criteria(stock_data)
-    
+
     print(f"共测试 {len(stock_data)} 只股票，筛选出 {len(selected)} 只符合条件的股票")
-    
+
     if selected:
         print("\n筛选结果:")
         for stock in selected:
             print(f"  {stock['name']} ({stock['code']}) - 评分: {stock['score']}分")
             print(f"    选股理由: {', '.join(stock['selection_reasons'][:3])}")
-            
+
             # 测试进场点位计算
             risk_data = selector.calculate_entry_points(stock)
             print(f"    激进进场: {risk_data['entry_points']['激进进场']:.2f}元")
             print(f"    止损位: {risk_data['stop_loss']:.2f}元")
             print(f"    风险收益比: {risk_data['risk_reward_ratio']:.2f}")
             print()
-    
+
     print("=" * 60)
-    
+
     # 测试报告生成
     print("报告生成测试:")
     report = selector.generate_selection_report(selected)
-    
+
     # 保存测试报告
     report_path = "data/tail_end_selection/test_report.md"
     os.makedirs(os.path.dirname(report_path), exist_ok=True)
-    
+
     with open(report_path, 'w', encoding='utf-8') as f:
         f.write(report)
-    
+
     print(f"测试报告已保存到: {report_path}")
-    
+
     # 显示报告前几行
     print("\n报告预览:")
     lines = report.split('\n')[:15]
     for line in lines:
         print(line)
-    
+
     print("..." * 20)
-    
+
     return True
 
 def test_full_selection():
@@ -144,64 +144,64 @@ def test_full_selection():
     print("\n" + "=" * 60)
     print("测试完整尾盘选股流程...")
     print("=" * 60)
-    
+
     selector = TailEndStockSelection()
-    
+
     # 使用测试股票代码
     test_codes = [
         "000001", "000002", "000004", "000005", "000006",
         "000007", "000008", "000009", "000010", "000011"
     ]
-    
+
     print(f"使用 {len(test_codes)} 只测试股票进行选股...")
-    
+
     # 模拟尾盘时间
     import time
     original_get_time = selector.get_current_time
-    
+
     def mock_tail_time():
         return datetime(2026, 4, 1, 14, 45, 0)
-    
+
     selector.get_current_time = mock_tail_time
-    
+
     try:
         result = selector.run_selection(test_codes)
-        
+
         if result:
             print("\n✅ 完整选股流程测试通过!")
             print(f"选股结果: {len(result['selected_stocks'])} 只股票")
             print(f"报告文件: {result['report_path']}")
         else:
             print("\n❌ 选股流程测试失败")
-            
+
     finally:
         selector.get_current_time = original_get_time
-    
+
     return True
 
 def main():
     """主测试函数"""
     print("尾盘选股策略测试套件")
     print("=" * 60)
-    
+
     try:
         # 测试策略逻辑
         test_strategy_logic()
-        
+
         # 测试完整流程
         test_full_selection()
-        
+
         print("\n" + "=" * 60)
         print("✅ 所有测试通过!")
         print("尾盘选股策略已准备就绪")
         print("=" * 60)
-        
+
     except Exception as e:
         print(f"\n❌ 测试失败: {e}")
         import traceback
         traceback.print_exc()
         return False
-    
+
     return True
 
 if __name__ == "__main__":

@@ -13,15 +13,15 @@ import os
 
 class OpenClawIntegration:
     """OpenClaw集成配置"""
-    
+
     def __init__(self):
         self.config_dir = "/Users/ago/.openclaw"
         self.workspace_dir = "/Users/ago/.openclaw/workspace"
-        
+
         print(f"🚀 OpenClaw集成配置初始化")
         print(f"   配置目录: {self.config_dir}")
         print(f"   工作空间: {self.workspace_dir}")
-    
+
     def create_model_config(self) -> Dict[str, Any]:
         """创建模型配置"""
         config = {
@@ -64,9 +64,9 @@ class OpenClawIntegration:
                 }
             }
         }
-        
+
         return config
-    
+
     def create_session_config(self) -> Dict[str, Any]:
         """创建会话配置"""
         config = {
@@ -103,9 +103,9 @@ class OpenClawIntegration:
                 }
             }
         }
-        
+
         return config
-    
+
     def create_cron_jobs(self) -> List[Dict[str, Any]]:
         """创建定时任务"""
         jobs = [
@@ -138,9 +138,9 @@ class OpenClawIntegration:
                 'enabled': True
             }
         ]
-        
+
         return jobs
-    
+
     def create_skill_config(self) -> Dict[str, Any]:
         """创建Skill配置"""
         skill_config = {
@@ -179,9 +179,9 @@ class OpenClawIntegration:
                 }
             }
         }
-        
+
         return skill_config
-    
+
     def generate_integration_guide(self) -> str:
         """生成集成指南"""
         guide = """
@@ -316,7 +316,7 @@ openclaw config set monthly_budget 50
    ```bash
    # 检查路由规则
    python3 intelligent_stock_analysis/routing/task_router.py --debug
-   
+
    # 更新关键词库
    python3 intelligent_stock_analysis/routing/task_router.py --update-keywords
    ```
@@ -325,7 +325,7 @@ openclaw config set monthly_budget 50
    ```bash
    # 检查数据源
    python3 intelligent_stock_analysis/collectors/v32_data_collector.py --test
-   
+
    # 优化缓存设置
    openclaw config set cache_ttl 180
    ```
@@ -334,7 +334,7 @@ openclaw config set monthly_budget 50
    ```bash
    # 查看详细成本分析
    python3 intelligent_stock_analysis/config/openclaw_integration.py --cost-detail
-   
+
    # 调整路由阈值
    openclaw config set min_confidence_threshold 0.7
    ```
@@ -423,49 +423,49 @@ openclaw skill info intelligent-stock-analysis
 
 享受智能股票分析带来的便利！ 🎉
 """
-        
+
         return guide
-    
+
     def save_configurations(self):
         """保存所有配置"""
         print(f"\n💾 保存配置到OpenClaw...")
-        
+
         configs = {
             'model_config': self.create_model_config(),
             'session_config': self.create_session_config(),
             'cron_jobs': self.create_cron_jobs(),
             'skill_config': self.create_skill_config()
         }
-        
+
         # 保存到文件
         for name, config in configs.items():
             filename = f"{self.config_dir}/{name}.json"
             with open(filename, 'w', encoding='utf-8') as f:
                 json.dump(config, f, ensure_ascii=False, indent=2)
             print(f"  ✅ 保存: {filename}")
-        
+
         # 保存集成指南
         guide_file = f"{self.workspace_dir}/docs/intelligent_stock_analysis_integration.md"
         with open(guide_file, 'w', encoding='utf-8') as f:
             f.write(self.generate_integration_guide())
         print(f"  ✅ 保存: {guide_file}")
-        
+
         print(f"\n🎉 所有配置保存完成！")
-    
+
     def demonstrate_integration(self):
         """演示集成效果"""
         print("\n" + "=" * 70)
         print("🔧 OpenClaw集成演示")
         print("=" * 70)
-        
+
         print(f"\n1. 📋 配置概览")
-        
+
         model_config = self.create_model_config()
         print(f"   模型路由: {'已启用' if model_config['model_routing']['enabled'] else '未启用'}")
         print(f"   默认模型: {model_config['model_routing']['default_model']}")
         print(f"   深度分析模型: {model_config['model_routing']['deep_analysis_model']}")
         print(f"   路由规则数: {len(model_config['model_routing']['routing_rules'])}")
-        
+
         print(f"\n2. 💰 成本优化配置")
         cost_config = model_config['model_routing']['cost_optimization']
         print(f"   成本优化: {'已启用' if cost_config['enabled'] else '未启用'}")
@@ -473,12 +473,12 @@ openclaw skill info intelligent-stock-analysis
         print(f"   R1成本: ${cost_config['r1_cost_per_1k']}/1K tokens")
         print(f"   目标节省: {cost_config['target_savings']*100}%")
         print(f"   月度预算: ${cost_config['monthly_budget']}")
-        
+
         print(f"\n3. ⏰ 定时任务配置")
         cron_jobs = self.create_cron_jobs()
         for job in cron_jobs:
             print(f"   • {job['name']}: {job['schedule']} → {job['model'].upper()}")
-        
+
         print(f"\n4. 🛠️ Skill配置")
         skill_config = self.create_skill_config()
         print(f"   Skill名称: {skill_config['skill']['name']}")

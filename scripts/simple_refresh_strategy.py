@@ -21,31 +21,31 @@ def get_real_price(stock_code):
             symbol = f'sh{stock_code}'
         else:
             symbol = f'sz{stock_code}'
-        
+
         url = f'http://hq.sinajs.cn/list={symbol}'
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
             'Referer': 'http://finance.sina.com.cn'
         }
-        
+
         response = requests.get(url, headers=headers, timeout=10)
         response.encoding = 'gbk'
-        
+
         data_str = response.text
         match = re.search(r'="(.*?)"', data_str)
-        
+
         if match:
             data = match.group(1).split(',')
             if len(data) > 3:
                 name = data[0]
                 price = float(data[3])
                 yesterday_close = float(data[2])
-                
+
                 if yesterday_close > 0:
                     change = (price - yesterday_close) / yesterday_close * 100
                 else:
                     change = 0.0
-                
+
                 return {
                     'success': True,
                     'name': name,
@@ -53,9 +53,9 @@ def get_real_price(stock_code):
                     'change': change,
                     'yesterday_close': yesterday_close
                 }
-        
+
         return {'success': False, 'error': '数据解析失败'}
-        
+
     except Exception as e:
         return {'success': False, 'error': str(e)}
 
@@ -65,12 +65,12 @@ def calculate_new_strategy(current_price):
     aggressive = current_price * 0.99  # 下跌1%
     steady = current_price * 0.97      # 下跌3%
     conservative = current_price * 0.95  # 下跌5%
-    
+
     # 风险控制（基于激进进场价）
     stop_loss = aggressive * 0.92      # 下跌8%
     take_profit_1 = aggressive * 1.08  # 上涨8%
     take_profit_2 = aggressive * 1.15  # 上涨15%
-    
+
     return {
         'entry_strategy': {
             '激进进场': round(aggressive, 2),
@@ -86,7 +86,7 @@ def calculate_new_strategy(current_price):
 def calculate_score(price, change):
     """计算股票评分"""
     score = 50  # 基础分
-    
+
     # 价格适中评分
     if 5 <= price <= 20:
         score += 20
@@ -94,7 +94,7 @@ def calculate_score(price, change):
         score += 15
     else:
         score += 10
-    
+
     # 涨跌评分（小幅下跌较好）
     if -3 <= change <= 3:
         score += 20
@@ -102,7 +102,7 @@ def calculate_score(price, change):
         score += 15
     else:
         score += 10
-    
+
     return min(max(score, 0), 100)
 
 # 加载现有投资组合
@@ -125,23 +125,23 @@ entered_stocks = []
 for stock in portfolio['stocks']:
     code = stock['code']
     print(f"🔍 刷新 {code} ...")
-    
+
     # 获取最新价格
     price_data = get_real_price(code)
-    
+
     if price_data['success']:
         current_price = price_data['price']
         change = price_data['change']
         name = price_data['name']
-        
+
         print(f"✅ {code} {name}: {current_price}元 ({change:+.2f}%)")
-        
+
         # 计算新策略
         new_strategy = calculate_new_strategy(current_price)
-        
+
         # 计算新评分
         score = calculate_score(current_price, change)
-        
+
         # 创建刷新后的股票信息
         refreshed_stock = {
             'code': code,
@@ -160,9 +160,9 @@ for stock in portfolio['stocks']:
             'price_timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
             'yesterday_close': price_data['yesterday_close']
         }
-        
+
         refreshed_stocks.append(refreshed_stock)
-        
+
         # 检查是否达到进场条件
         entry = new_strategy['entry_strategy']
         if current_price <= entry['激进进场']:
@@ -178,11 +178,11 @@ for stock in portfolio['stocks']:
             diff = current_price - entry['保守进场']
             diff_pct = diff / current_price * 100
             print(f"   ⏳ 未达到进场条件 (还需下跌{diff:.2f}元, {diff_pct:.1f}%)")
-        
+
         print(f"   📊 新评分: {score}/100")
         print(f"   🛡️ 新止损: {new_strategy['risk_control']['stop_loss']}元")
         print(f"   🎯 新止盈: {new_strategy['risk_control']['take_profit'][0]}/{new_strategy['risk_control']['take_profit'][1]}元")
-        
+
     else:
         print(f"❌ {code}: 获取价格失败 - {price_data.get('error', '未知错误')}")
 
@@ -234,7 +234,7 @@ if entered_stocks:
     print("🎯 已达到进场条件的股票:")
     for stock, entry_type in entered_stocks:
         print(f"   {stock['code']} {stock['name']}: {stock['current_price']}元 ({entry_type})")
-    
+
     print()
     print("💡 操作建议:")
     print("   1. 立即评估这些股票的进场机会")

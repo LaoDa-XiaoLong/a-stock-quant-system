@@ -16,7 +16,7 @@ def test_real_price():
     print("=" * 60)
     print("🧪 测试真实价格系统")
     print("=" * 60)
-    
+
     # 测试股票列表
     test_stocks = [
         '000001',  # 平安银行
@@ -30,13 +30,13 @@ def test_real_price():
         '000010',  # 美丽生态
         '000020',  # 深华发Ａ
     ]
-    
+
     print(f"📊 测试 {len(test_stocks)} 只股票的实时价格")
     print("-" * 40)
-    
+
     successful = 0
     failed = 0
-    
+
     for stock_code in test_stocks:
         try:
             # 判断市场
@@ -48,7 +48,7 @@ def test_real_price():
                 print(f"❌ {stock_code}: 无法识别市场")
                 failed += 1
                 continue
-            
+
             # 新浪财经API
             import requests
             url = f"http://hq.sinajs.cn/list={market_code}"
@@ -56,7 +56,7 @@ def test_real_price():
                 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
                 'Referer': 'http://finance.sina.com.cn'
             }
-            
+
             response = requests.get(url, headers=headers, timeout=5)
             if response.status_code == 200:
                 content = response.text
@@ -67,12 +67,12 @@ def test_real_price():
                         stock_name = data_parts[0]
                         current_price = float(data_parts[3])
                         yesterday_close = float(data_parts[2])
-                        
+
                         if yesterday_close > 0:
                             change_percent = (current_price - yesterday_close) / yesterday_close * 100
                         else:
                             change_percent = 0.0
-                        
+
                         print(f"✅ {stock_code} {stock_name}: {current_price}元 ({change_percent:.2f}%)")
                         successful += 1
                     else:
@@ -84,19 +84,19 @@ def test_real_price():
             else:
                 print(f"❌ {stock_code}: API请求失败 ({response.status_code})")
                 failed += 1
-                
+
         except Exception as e:
             print(f"❌ {stock_code}: 获取失败 - {str(e)[:50]}")
             failed += 1
-    
+
     print("-" * 40)
     print(f"📈 测试结果: 成功 {successful} / 失败 {failed}")
-    
+
     if successful > 0:
         print("✅ 真实价格系统工作正常")
     else:
         print("❌ 真实价格系统测试失败")
-    
+
     print("=" * 60)
     return successful > 0
 
@@ -104,34 +104,34 @@ def test_investment_portfolio():
     """测试投资组合更新"""
     print("\n🔍 测试投资组合更新")
     print("-" * 40)
-    
+
     portfolio_path = "/Users/ago/.openclaw/workspace/data/investment_tracking/investment_portfolio.json"
-    
+
     if not os.path.exists(portfolio_path):
         print("❌ 投资组合文件不存在")
         return False
-    
+
     try:
         with open(portfolio_path, 'r', encoding='utf-8') as f:
             portfolio = json.load(f)
-        
+
         stocks = portfolio.get('stocks', [])
         print(f"📊 投资组合: {len(stocks)} 只股票")
-        
+
         if stocks:
             print("📋 股票列表:")
             for stock in stocks[:5]:  # 显示前5只
                 print(f"  {stock.get('code', '')} {stock.get('name', '')}: {stock.get('current_price', 0)}元")
-            
+
             if len(stocks) > 5:
                 print(f"  ... 还有 {len(stocks)-5} 只")
-        
+
         print(f"💰 最后更新: {portfolio.get('last_updated', 'N/A')}")
         print(f"📈 价格来源: {portfolio.get('price_source', 'N/A')}")
-        
+
         print("✅ 投资组合文件正常")
         return True
-        
+
     except Exception as e:
         print(f"❌ 读取投资组合失败: {e}")
         return False
@@ -140,17 +140,17 @@ def test_strategy_config():
     """测试策略配置"""
     print("\n🔧 测试策略配置")
     print("-" * 40)
-    
+
     config_path = "/Users/ago/.openclaw/workspace/skills/tail_end_selection/config.json"
-    
+
     if not os.path.exists(config_path):
         print("❌ 策略配置文件不存在")
         return False
-    
+
     try:
         with open(config_path, 'r', encoding='utf-8') as f:
             config = json.load(f)
-        
+
         print("📋 策略配置:")
         print(f"  策略名称: {config.get('skill_name', 'N/A')}")
         print(f"  使用真实价格: {config.get('use_real_prices', False)}")
@@ -159,10 +159,10 @@ def test_strategy_config():
         print(f"  止损比例: {config.get('stop_loss_percent', 0)*100}%")
         print(f"  止盈比例: {config.get('take_profit_percent', 0)*100}%")
         print(f"  最后更新: {config.get('last_updated', 'N/A')}")
-        
+
         print("✅ 策略配置正常")
         return True
-        
+
     except Exception as e:
         print(f"❌ 读取策略配置失败: {e}")
         return False
@@ -171,7 +171,7 @@ def create_system_status_report():
     """创建系统状态报告"""
     print("\n📊 创建系统状态报告")
     print("-" * 40)
-    
+
     report = f"""# 真实价格系统状态报告
 ## 报告时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 
@@ -230,13 +230,13 @@ def create_system_status_report():
 **系统状态**: ✅ 正常
 **最后检查**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 """
-    
+
     report_path = "/Users/ago/.openclaw/workspace/reports/real_price_system_status.md"
     os.makedirs(os.path.dirname(report_path), exist_ok=True)
-    
+
     with open(report_path, 'w', encoding='utf-8') as f:
         f.write(report)
-    
+
     print(f"✅ 系统状态报告已保存: {report_path}")
     return report_path
 
@@ -245,23 +245,23 @@ def main():
     print("=" * 60)
     print("🧪 真实价格系统全面测试")
     print("=" * 60)
-    
+
     # 1. 测试真实价格获取
     price_test = test_real_price()
-    
+
     # 2. 测试投资组合
     portfolio_test = test_investment_portfolio()
-    
+
     # 3. 测试策略配置
     config_test = test_strategy_config()
-    
+
     # 4. 创建状态报告
     report_path = create_system_status_report()
-    
+
     print("=" * 60)
     print("📊 测试总结")
     print("=" * 60)
-    
+
     if price_test and portfolio_test and config_test:
         print("🎉 所有测试通过!")
         print("✅ 真实价格系统工作正常")
@@ -276,7 +276,7 @@ def main():
             print("❌ 投资组合测试失败")
         if not config_test:
             print("❌ 策略配置测试失败")
-    
+
     print("=" * 60)
     print("🚀 启动命令:")
     print("bash scripts/start_real_time_strategy.sh")

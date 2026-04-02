@@ -18,7 +18,7 @@ import json
 def main():
     print(f"📊 每周股票池筛选 - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("=" * 60)
-    
+
     # 模拟筛选结果
     stocks = [
         {"code": "000001", "name": "平安银行", "score": 85, "reason": "基本面优秀"},
@@ -27,13 +27,13 @@ def main():
         {"code": "600519", "name": "贵州茅台", "score": 95, "reason": "龙头地位"},
         {"code": "000858", "name": "五粮液", "score": 88, "reason": "消费升级"},
     ]
-    
+
     # 保存结果
     output_dir = "data/stock_pool"
     os.makedirs(output_dir, exist_ok=True)
-    
+
     output_file = f"{output_dir}/weekly_screening_{datetime.now().strftime('%Y%m%d')}.json"
-    
+
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump({
             "date": datetime.now().strftime('%Y-%m-%d'),
@@ -42,7 +42,7 @@ def main():
             "stocks": stocks,
             "generated_at": datetime.now().isoformat()
         }, f, ensure_ascii=False, indent=2)
-    
+
     print(f"✅ 筛选完成: {output_file}")
     print(f"   筛选股票: {len(stocks)}只")
     print(f"   平均分数: {sum(s['score'] for s in stocks) / len(stocks):.1f}")
@@ -79,28 +79,28 @@ def run_check(command, check_name):
 def main():
     print(f"🔧 每周代码质量检查 - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("=" * 60)
-    
+
     checks = [
         ("python -m pylint scripts/ --fail-under=7.0", "Pylint代码规范"),
         ("python -m black --check scripts/", "Black代码格式"),
         ("python -m mypy scripts/ --ignore-missing-imports", "Mypy类型检查"),
         ("python -m pytest tests/ -v", "Pytest单元测试"),
     ]
-    
+
     results = []
     all_passed = True
-    
+
     for cmd, name in checks:
         print(f"正在检查: {name}...")
         result = run_check(cmd, name)
         results.append(result)
-        
+
         if result["success"]:
             print(f"  ✅ {name}: 通过")
         else:
             print(f"  ❌ {name}: 失败")
             all_passed = False
-    
+
     # 保存报告
     report = {
         "date": datetime.now().strftime('%Y-%m-%d'),
@@ -108,14 +108,14 @@ def main():
         "checks": results,
         "generated_at": datetime.now().isoformat()
     }
-    
+
     report_dir = "reports/code_quality"
     os.makedirs(report_dir, exist_ok=True)
     report_file = f"{report_dir}/weekly_code_quality_{datetime.now().strftime('%Y%m%d')}.json"
-    
+
     with open(report_file, 'w', encoding='utf-8') as f:
         json.dump(report, f, ensure_ascii=False, indent=2)
-    
+
     print(f"\\n📋 报告保存: {report_file}")
     print(f"总体状态: {'✅ 全部通过' if all_passed else '❌ 有检查失败'}")
 
@@ -138,7 +138,7 @@ import os
 def main():
     print(f"📈 每周数据质量验证 - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("=" * 60)
-    
+
     # 模拟数据验证
     validations = [
         {"check": "财报数据完整性", "status": "✅", "details": "100%字段完整"},
@@ -147,12 +147,12 @@ def main():
         {"check": "时间序列连续性", "status": "✅", "details": "数据连续无中断"},
         {"check": "数据格式规范", "status": "✅", "details": "符合规范要求"},
     ]
-    
+
     # 计算质量分数
     total_checks = len(validations)
     passed_checks = sum(1 for v in validations if v["status"] == "✅")
     quality_score = (passed_checks / total_checks) * 100
-    
+
     # 保存报告
     report = {
         "date": datetime.now().strftime('%Y-%m-%d'),
@@ -162,17 +162,17 @@ def main():
         "validations": validations,
         "generated_at": datetime.now().isoformat()
     }
-    
+
     report_dir = "data/quality_validation"
     os.makedirs(report_dir, exist_ok=True)
     report_file = f"{report_dir}/weekly_validation_{datetime.now().strftime('%Y%m%d')}.json"
-    
+
     with open(report_file, 'w', encoding='utf-8') as f:
         json.dump(report, f, ensure_ascii=False, indent=2)
-    
+
     print(f"验证完成: {report_file}")
     print(f"质量分数: {quality_score:.1f}分 ({passed_checks}/{total_checks}通过)")
-    
+
     for v in validations:
         print(f"{v['status']} {v['check']}: {v['details']}")
 
@@ -195,11 +195,11 @@ import os
 def main():
     print(f"📊 GitHub维护周报 - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("=" * 60)
-    
+
     # 模拟周报数据
     week_start = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
     week_end = datetime.now().strftime('%Y-%m-%d')
-    
+
     report = {
         "period": f"{week_start} 至 {week_end}",
         "commits": 15,
@@ -224,15 +224,15 @@ def main():
         },
         "generated_at": datetime.now().isoformat()
     }
-    
+
     # 保存报告
     report_dir = "logs/github_weekly"
     os.makedirs(report_dir, exist_ok=True)
     report_file = f"{report_dir}/github_weekly_{datetime.now().strftime('%Y%m%d')}.json"
-    
+
     with open(report_file, 'w', encoding='utf-8') as f:
         json.dump(report, f, ensure_ascii=False, indent=2)
-    
+
     print(f"周报生成: {report_file}")
     print(f"统计周期: {report['period']}")
     print(f"提交次数: {report['commits']}次")

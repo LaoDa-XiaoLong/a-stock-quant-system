@@ -15,21 +15,21 @@ def configure_code_health_webhook():
     print("=" * 60)
     print("🔧 配置代码健康度检查任务Webhook")
     print("=" * 60)
-    
+
     # Webhook地址
     work_group_webhook = "https://open.feishu.cn/open-apis/bot/v2/hook/7c6e2bb9-0f2f-4d16-ade1-e93cf6bd3065"
-    
+
     print(f"📋 配置信息:")
     print(f"   任务名称: 代码健康度检查")
     print(f"   Webhook地址: {work_group_webhook[:50]}...")
     print(f"   消息类型: 系统技术消息 → 工作沟通汇报群")
-    
+
     # 1. 创建飞书配置文件
     config_dir = os.path.expanduser("~/.openclaw")
     config_file = os.path.join(config_dir, "feishu_config.json")
-    
+
     os.makedirs(config_dir, exist_ok=True)
-    
+
     config = {
         "feishu": {
             "webhook_url": work_group_webhook,
@@ -39,40 +39,40 @@ def configure_code_health_webhook():
             "purpose": "代码健康度检查任务专用"
         }
     }
-    
+
     with open(config_file, 'w', encoding='utf-8') as f:
         json.dump(config, f, ensure_ascii=False, indent=2)
-    
+
     print(f"✅ 飞书配置文件已创建: {config_file}")
-    
+
     # 2. 测试Webhook地址
     print(f"\n🧪 测试Webhook地址...")
     test_result = test_webhook(work_group_webhook)
-    
+
     if test_result:
         print(f"✅ Webhook地址测试成功!")
     else:
         print(f"❌ Webhook地址测试失败，但继续配置")
-    
+
     # 3. 启用任务
     print(f"\n🚀 启用代码健康度检查任务...")
     enable_result = enable_code_health_task()
-    
+
     if enable_result:
         print(f"✅ 任务启用成功!")
     else:
         print(f"❌ 任务启用失败")
-    
+
     # 4. 显示最终状态
     print(f"\n📊 最终配置状态:")
     print(f"   配置文件: {config_file}")
     print(f"   Webhook地址: 工作沟通汇报群")
     print(f"   任务状态: {'已启用' if enable_result else '启用失败'}")
     print(f"   测试结果: {'成功' if test_result else '失败'}")
-    
+
     # 5. 创建验证脚本
     create_verification_script()
-    
+
     return test_result and enable_result
 
 
@@ -80,17 +80,17 @@ def test_webhook(webhook_url):
     """测试Webhook地址"""
     try:
         import requests
-        
+
         test_message = {
             "msg_type": "text",
             "content": {
                 "text": "✅ 代码健康度检查任务配置测试\n时间: " + datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "\n状态: Webhook地址配置成功\n消息类型: 系统技术消息 → 工作沟通汇报群"
             }
         }
-        
+
         print(f"   发送测试消息到工作沟通汇报群...")
         response = requests.post(webhook_url, json=test_message, timeout=10)
-        
+
         if response.status_code == 200:
             result = response.json()
             if result.get("code") == 0:
@@ -103,7 +103,7 @@ def test_webhook(webhook_url):
             print(f"   HTTP错误: {response.status_code}")
             print(f"   响应: {response.text[:100]}")
             return False
-            
+
     except Exception as e:
         print(f"   测试失败: {e}")
         return False
@@ -113,7 +113,7 @@ def enable_code_health_task():
     """启用代码健康度检查任务"""
     try:
         import subprocess
-        
+
         # 启用任务
         result = subprocess.run(
             ["openclaw", "cron", "enable", "17da0ef4-47a1-47c2-b925-365131db70a7"],
@@ -121,10 +121,10 @@ def enable_code_health_task():
             text=True,
             timeout=10
         )
-        
+
         if result.returncode == 0:
             print(f"   任务启用命令执行成功")
-            
+
             # 检查任务状态
             status_result = subprocess.run(
                 ["openclaw", "cron", "list", "--all"],
@@ -132,7 +132,7 @@ def enable_code_health_task():
                 text=True,
                 timeout=10
             )
-            
+
             if status_result.returncode == 0:
                 # 提取代码健康度检查任务状态
                 lines = status_result.stdout.split('\n')
@@ -140,12 +140,12 @@ def enable_code_health_task():
                     if "代码健康度检查" in line:
                         print(f"   任务状态: {line}")
                         return True
-            
+
             return True
         else:
             print(f"   任务启用失败: {result.stderr}")
             return False
-            
+
     except Exception as e:
         print(f"   启用任务时出错: {e}")
         return False
@@ -183,15 +183,15 @@ echo "   openclaw cron list --all"
 echo ""
 echo "🎯 配置完成！任务将在明天15:00自动执行"
 """
-    
+
     script_file = "/Users/ago/.openclaw/workspace/scripts/verify_code_health_config.sh"
     with open(script_file, 'w') as f:
         f.write(script_content)
-    
+
     # 设置执行权限
     import stat
     os.chmod(script_file, stat.S_IRWXU | stat.S_IRGRP | stat.S_IROTH)
-    
+
     print(f"📜 验证脚本已创建: {script_file}")
     print(f"   使用: bash {script_file}")
 
@@ -201,27 +201,27 @@ def show_final_summary():
     print("\n" + "=" * 60)
     print("🎉 配置完成总结")
     print("=" * 60)
-    
+
     print("\n📋 已完成的配置:")
     print("1. ✅ 创建飞书配置文件: ~/.openclaw/feishu_config.json")
     print("2. ✅ 配置Webhook地址: 工作沟通汇报群地址")
     print("3. ✅ 启用代码健康度检查任务")
     print("4. ✅ 创建验证脚本: scripts/verify_code_health_config.sh")
-    
+
     print("\n🎯 消息分发规则确认:")
     print("• A股数据分析群: 所有A股投资相关内容")
     print("• 工作沟通汇报群: 所有系统技术相关内容")
     print("• 代码健康度检查 → 工作沟通汇报群 ✅")
-    
+
     print("\n⏰ 任务执行时间:")
     print("• 代码健康度检查: 每日15:00")
     print("• 下次执行: 明天15:00")
-    
+
     print("\n🔧 验证方法:")
     print("1. 运行验证脚本: bash scripts/verify_code_health_config.sh")
     print("2. 查看任务状态: openclaw cron list --all")
     print("3. 手动测试: openclaw cron run 17da0ef4-47a1-47c2-b925-365131db70a7")
-    
+
     print("\n🚀 所有调度任务状态 (8个任务):")
     print("1. 财报监控日报 (09:00) → A股群")
     print("2. 股票数据更新 (09:30) → 内部")
@@ -236,18 +236,18 @@ def show_final_summary():
 def main():
     """主函数"""
     print("🚀 开始配置代码健康度检查任务...")
-    
+
     # 配置Webhook
     success = configure_code_health_webhook()
-    
+
     if success:
         print("\n✅ 配置成功完成!")
     else:
         print("\n⚠️ 配置部分完成，需要手动检查")
-    
+
     # 显示总结
     show_final_summary()
-    
+
     return success
 
 

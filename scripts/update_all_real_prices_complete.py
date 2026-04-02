@@ -23,14 +23,14 @@ def get_real_stock_price(stock_code):
         else:
             print(f"⚠️ 无法识别股票代码: {stock_code}")
             return None
-        
+
         # 新浪财经API
         url = f"http://hq.sinajs.cn/list={market_code}"
         headers = {
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
             'Referer': 'http://finance.sina.com.cn'
         }
-        
+
         response = requests.get(url, headers=headers, timeout=10)
         if response.status_code == 200:
             content = response.text
@@ -41,13 +41,13 @@ def get_real_stock_price(stock_code):
                     # 当前价格是第4个字段 (索引3)
                     current_price = float(data_parts[3])
                     yesterday_close = float(data_parts[2])
-                    
+
                     # 计算涨跌幅
                     if yesterday_close > 0:
                         change_percent = (current_price - yesterday_close) / yesterday_close * 100
                     else:
                         change_percent = 0.0
-                    
+
                     return {
                         'code': stock_code,
                         'name': data_parts[0],
@@ -62,36 +62,36 @@ def get_real_stock_price(stock_code):
                     }
     except Exception as e:
         print(f"❌ 获取股票 {stock_code} 价格失败: {e}")
-    
+
     return None
 
 def update_investment_portfolio():
     """更新投资组合为真实价格"""
     print("🔍 更新投资组合为真实价格...")
-    
+
     portfolio_path = "/Users/ago/.openclaw/workspace/data/investment_tracking/investment_portfolio.json"
-    
+
     if not os.path.exists(portfolio_path):
         print(f"❌ 投资组合文件不存在: {portfolio_path}")
         return False
-    
+
     try:
         # 读取投资组合
         with open(portfolio_path, 'r', encoding='utf-8') as f:
             portfolio = json.load(f)
-        
+
         stocks = portfolio.get('stocks', [])
         print(f"📊 当前投资组合: {len(stocks)} 只股票")
-        
+
         if len(stocks) == 0:
             print("⚠️  投资组合为空，无需更新")
             return True
-        
+
         # 获取所有股票代码
         stock_codes = [stock['code'] for stock in stocks if 'code' in stock]
-        
+
         print(f"📈 需要获取 {len(stock_codes)} 只股票的实时价格")
-        
+
         # 获取真实价格
         real_prices = {}
         for stock_code in stock_codes:
@@ -103,21 +103,21 @@ def update_investment_portfolio():
             else:
                 print(f"    ⚠️  {stock_code}: 获取失败")
             time.sleep(0.5)
-        
+
         # 更新投资组合
         updated_count = 0
         for stock in stocks:
             stock_code = stock.get('code', '')
             if stock_code in real_prices:
                 price_data = real_prices[stock_code]
-                
+
                 # 更新价格信息
                 stock['current_price'] = price_data['current_price']
                 stock['current_change'] = price_data['change_percent']
                 stock['yesterday_close'] = price_data['yesterday_close']
                 stock['price_source'] = 'sina_real_time'
                 stock['price_timestamp'] = price_data['timestamp']
-                
+
                 # 重新计算进场点位 (基于真实价格)
                 current_price = price_data['current_price']
                 stock['entry_strategy'] = {
@@ -125,7 +125,7 @@ def update_investment_portfolio():
                     '稳健进场': round(current_price * 0.97, 2),  # 下跌3%
                     '保守进场': round(current_price * 0.95, 2)   # 下跌5%
                 }
-                
+
                 # 重新计算止损止盈
                 aggressive_entry = current_price * 0.99
                 stock['stop_loss'] = round(aggressive_entry * 0.92, 2)  # 止损8%
@@ -133,52 +133,52 @@ def update_investment_portfolio():
                     round(aggressive_entry * 1.08, 2),  # 第一止盈8%
                     round(aggressive_entry * 1.15, 2)   # 第二止盈15%
                 ]
-                
+
                 updated_count += 1
-        
+
         # 更新投资组合信息
         portfolio['last_updated'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         portfolio['price_source'] = 'sina_real_time'
-        
+
         # 计算总投资
         total_investment = 0
         current_value = 0
-        
+
         for stock in stocks:
             if stock.get('position', 0) > 0:
                 position = stock['position']
                 entry_price = stock.get('entry_price', 0)
                 current_price = stock.get('current_price', 0)
-                
+
                 if entry_price > 0:
                     total_investment += position * entry_price
                     current_value += position * current_price
-        
+
         portfolio['total_investment'] = round(total_investment, 2)
         portfolio['current_value'] = round(current_value, 2)
-        
+
         if total_investment > 0:
             total_profit_loss = current_value - total_investment
             total_profit_loss_pct = (total_profit_loss / total_investment) * 100
             portfolio['total_profit_loss'] = round(total_profit_loss, 2)
             portfolio['total_profit_loss_pct'] = round(total_profit_loss_pct, 2)
-        
+
         # 保存更新后的投资组合
         with open(portfolio_path, 'w', encoding='utf-8') as f:
             json.dump(portfolio, f, ensure_ascii=False, indent=2)
-        
+
         print(f"✅ 成功更新 {updated_count} 只股票的实时价格")
         print(f"💰 总投资: {portfolio['total_investment']}元")
         print(f"📈 当前价值: {portfolio['current_value']}元")
-        
+
         if 'total_profit_loss' in portfolio:
             profit_loss = portfolio['total_profit_loss']
             profit_loss_pct = portfolio['total_profit_loss_pct']
             status = "📈" if profit_loss >= 0 else "📉"
             print(f"{status} 总盈亏: {profit_loss}元 ({profit_loss_pct}%)")
-        
+
         return True
-        
+
     except Exception as e:
         print(f"❌ 更新投资组合失败: {e}")
         return False
@@ -188,12 +188,12 @@ def main():
     print("=" * 60)
     print("🚀 切换到真实价格系统 - 完整版")
     print("=" * 60)
-    
+
     # 1. 更新投资组合为真实价格
     success = update_investment_portfolio()
-    
+
     print("=" * 60)
-    
+
     if success:
         print("🎉 真实价格系统切换完成!")
         print("=" * 60)
@@ -212,7 +212,7 @@ def main():
         print("1. 检查网络连接")
         print("2. 检查股票代码格式")
         print("3. 手动运行脚本重试")
-    
+
     print("=" * 60)
 
 if __name__ == "__main__":

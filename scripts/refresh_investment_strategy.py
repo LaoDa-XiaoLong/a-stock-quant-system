@@ -3,7 +3,7 @@
 
 ### 📊 已达到进场条件的股票 ({len(entered_stocks)}只)
 """
-        
+
         if entered_stocks:
             for i, (stock, entry_type) in enumerate(entered_stocks, 1):
                 report_content += f"""{i}. **{stock['code']} {stock['name']}** - {entry_type}
@@ -17,7 +17,7 @@
 """
         else:
             report_content += "暂无股票达到进场条件\n"
-        
+
         report_content += f"""
 ### 💡 策略刷新说明
 
@@ -75,12 +75,12 @@
         # 写入报告文件
         with open(report_file, 'w', encoding='utf-8') as f:
             f.write(report_content)
-        
+
         print(f"✅ 策略刷新报告已生成: {report_file}")
-        
+
         # 生成简版摘要
         summary_file = f'{self.tracking_dir}/strategy_refresh_summary_{timestamp}.txt'
-        
+
         summary_content = f"""🔄 投资策略刷新摘要 ({today} {datetime.now().strftime('%H:%M:%S')})
 
 【刷新结果】
@@ -90,13 +90,13 @@
 
 【已达到进场条件】 ({len(entered_stocks)}只)
 """
-        
+
         for stock, entry_type in entered_stocks:
             summary_content += f"{stock['code']} {stock['name']}: {stock['current_price']}元 ({entry_type})\n"
-        
+
         if not entered_stocks:
             summary_content += "暂无\n"
-        
+
         summary_content += f"""
 【新策略特点】
 1. 基于最新真实价格动态计算
@@ -112,27 +112,27 @@
 
 【系统状态】 ✅ 准备就绪
 """
-        
+
         with open(summary_file, 'w', encoding='utf-8') as f:
             f.write(summary_content)
-        
+
         print(f"✅ 策略刷新摘要已生成: {summary_file}")
-        
+
         return report_file
-    
+
     def main(self):
         """主函数"""
         print("=" * 60)
         print("🔄 投资策略刷新 - 基于最新真实价格")
         print("=" * 60)
-        
+
         # 刷新投资策略
         new_portfolio = self.refresh_from_existing_portfolio()
-        
+
         if new_portfolio:
             # 生成报告
             report_file = self.generate_refresh_report(new_portfolio)
-            
+
             print("=" * 60)
             print("🎉 投资策略刷新完成！")
             print()
@@ -142,27 +142,27 @@
             print(f"3. data/investment_tracking/investment_portfolio_refreshed_*.json - 新投资组合")
             print()
             print("📊 刷新结果摘要:")
-            
+
             # 统计达到进场条件的股票
             entered_stocks = []
             for stock in new_portfolio['stocks']:
                 current_price = stock['current_price']
                 entry_strategy = stock['entry_strategy']
-                
+
                 if current_price <= entry_strategy['激进进场']:
                     entered_stocks.append((stock, '激进进场'))
                 elif current_price <= entry_strategy['稳健进场']:
                     entered_stocks.append((stock, '稳健进场'))
                 elif current_price <= entry_strategy['保守进场']:
                     entered_stocks.append((stock, '保守进场'))
-            
+
             print(f"   已达到进场条件的股票: {len(entered_stocks)}/{len(new_portfolio['stocks'])}只")
-            
+
             if entered_stocks:
                 print("   🎯 具体股票:")
                 for stock, entry_type in entered_stocks:
                     print(f"      {stock['code']} {stock['name']}: {stock['current_price']}元 ({entry_type})")
-            
+
             print()
             print("⏰ 系统将在明天交易时间自动启动:")
             print("   09:29 - 上午监控启动")

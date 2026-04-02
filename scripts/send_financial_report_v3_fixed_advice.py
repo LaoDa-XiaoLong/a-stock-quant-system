@@ -26,7 +26,7 @@ except ImportError:
     class SafeFeishuSender:
         def __init__(self, webhook_url):
             self.webhook_url = webhook_url
-        
+
         def send_text(self, text):
             print(f"[模拟发送] 消息长度: {len(text)}字符")
             print(f"[模拟发送] 内容预览: {text[:100]}...")
@@ -35,52 +35,52 @@ except ImportError:
 
 class FixedAdviceGenerator:
     """修复后的建议生成器（内嵌版本）"""
-    
+
     def __init__(self):
         # 配置参数
         self.min_data_quality = 80  # 最低数据质量分数
         self.max_surprise_ratio = 1.0  # 最大超预期比例
         self.required_fields = ['actual_value', 'expected_value', 'surprise_ratio', 'data_quality_score']
-        
+
     def validate_data(self, stock: Dict) -> Tuple[bool, str, str]:
         """数据验证前置检查"""
         # 1. 检查数据完整性
         for field in self.required_fields:
             if field not in stock:
                 return False, f"缺失必要字段: {field}", "high"
-        
+
         # 2. 检查数值有效性
         if stock['actual_value'] == 0:
             return False, "实际值为0，数据异常", "critical"
         if stock['expected_value'] == 0:
             return False, "预期值为0，数据异常", "critical"
-        
+
         # 3. 检查数据质量
         if stock['data_quality_score'] < self.min_data_quality:
             return False, f"数据质量分数过低: {stock['data_quality_score']}", "medium"
-        
+
         # 4. 检查超预期比例合理性
         if math.isinf(stock['surprise_ratio']) or math.isnan(stock['surprise_ratio']):
             return False, "超预期比例计算错误", "critical"
-        
+
         if abs(stock['surprise_ratio']) > self.max_surprise_ratio:
             return False, f"超预期比例异常: {stock['surprise_ratio']:.1f}", "high"
-        
+
         return True, "数据验证通过", "low"
-    
+
     def get_trading_advice(self, stock: Dict) -> str:
         """修复后的交易建议生成"""
         # 数据验证
         is_valid, message, risk_level = self.validate_data(stock)
         if not is_valid:
             return self._format_error_advice(message, risk_level)
-        
+
         surprise_ratio = stock['surprise_ratio']
         data_quality = stock['data_quality_score']
-        
+
         # 根据数据质量调整建议强度
         quality_factor = data_quality / 100.0
-        
+
         if surprise_ratio >= 0.30 * quality_factor:
             advice = "强烈推荐加仓"
             color = "green"
@@ -105,13 +105,13 @@ class FixedAdviceGenerator:
             advice = "考虑减仓"
             color = "red"
             icon = "🚨"
-        
+
         # 添加数据质量提示
         if data_quality < 90:
             advice = f"{advice} (数据质量: {data_quality}分)"
-        
+
         return f"{icon} {advice}"
-    
+
     def _format_error_advice(self, message: str, risk_level: str) -> str:
         """格式化错误建议"""
         colors = {
@@ -121,7 +121,7 @@ class FixedAdviceGenerator:
             "low": "blue"
         }
         color = colors.get(risk_level, "red")
-        
+
         icons = {
             "critical": "🚨",
             "high": "⚠️",
@@ -129,36 +129,36 @@ class FixedAdviceGenerator:
             "low": "ℹ️"
         }
         icon = icons.get(risk_level, "⚠️")
-        
+
         return f"{icon} {message}"
 
 
 class FinancialReportSenderV3Fixed:
     """V3深度优化版财报报告发送器（修复建议风险）"""
-    
+
     def __init__(self, webhook_url: str = None):
         # A股数据分析群webhook
         self.webhook_url = webhook_url or "https://open.feishu.cn/open-apis/bot/v2/hook/fb95ec56-6ad7-4830-99c7-0eaa287e67e7"
         self.sender = SafeFeishuSender(self.webhook_url)
         self.data_dir = 'data/final_financial_complete'
         self.db_path = f'{self.data_dir}/final_reports_complete.db'
-        
+
         # 修复后的建议生成器
         self.advice_generator = FixedAdviceGenerator()
-        
+
         print(f"📊 V3深度优化版财报报告发送器（修复建议风险）初始化完成")
         print(f"📡 目标群组: A股数据分析群")
         print(f"🔧 已集成修复后的建议生成算法")
-    
+
     def get_today_report_data(self) -> Dict:
         """获取今日的报告数据（模拟版本）"""
         # 由于数据库可能不存在，返回包含错误数据的模拟数据以测试修复效果
         return self._create_test_report_with_errors()
-    
+
     def _create_test_report_with_errors(self) -> Dict:
         """创建包含错误数据的测试报告"""
         today = datetime.now().strftime('%Y-%m-%d')
-        
+
         # 持仓股票数据（包含正常和错误数据）
         holdings = [
             # 正常高质量数据
@@ -232,7 +232,7 @@ class FinancialReportSenderV3Fixed:
                 'is_holding': 1
             }
         ]
-        
+
         # 构建报告
         report = {
             'date': today,
@@ -245,15 +245,15 @@ class FinancialReportSenderV3Fixed:
             'holdings': holdings,
             'all_stocks': holdings
         }
-        
+
         # 计算市场统计数据
         report['market_stats'] = self._calculate_market_stats(holdings, holdings)
-        
+
         # 检查数据合理性
         report['data_quality_issues'] = self._check_data_quality_issues(report)
-        
+
         return report
-    
+
     def _calculate_market_stats(self, all_stocks: List[Dict], holdings: List[Dict]) -> Dict:
         """计算市场统计数据"""
         stats = {
@@ -264,7 +264,7 @@ class FinancialReportSenderV3Fixed:
             'data_quality_issues': self._count_data_quality_issues(all_stocks),
             'industry_stats': {}
         }
-        
+
         # 计算行业统计
         for stock in all_stocks:
             industry = stock.get('industry', '其他')
@@ -275,15 +275,15 @@ class FinancialReportSenderV3Fixed:
                     'holdings': 0,
                     'avg_quality': 0
                 }
-            
+
             stats['industry_stats'][industry]['total'] += 1
             if stock.get('surprise_ratio', 0) >= 0.20:
                 stats['industry_stats'][industry]['surprises'] += 1
             if stock.get('is_holding', 0):
                 stats['industry_stats'][industry]['holdings'] += 1
-        
+
         return stats
-    
+
     def _count_data_quality_issues(self, stocks: List[Dict]) -> Dict:
         """统计数据质量问题"""
         issues = {
@@ -292,30 +292,30 @@ class FinancialReportSenderV3Fixed:
             'extreme_ratios': 0,
             'total_checked': len(stocks)
         }
-        
+
         for stock in stocks:
             # 检查零值
             if stock.get('actual_value', 1) == 0 or stock.get('expected_value', 1) == 0:
                 issues['zero_values'] += 1
-            
+
             # 检查低质量数据
             if stock.get('data_quality_score', 100) < 80:
                 issues['low_quality'] += 1
-            
+
             # 检查极端比例
             ratio = stock.get('surprise_ratio', 0)
             if math.isinf(ratio) or math.isnan(ratio) or abs(ratio) > 1.0:
                 issues['extreme_ratios'] += 1
-        
+
         return issues
-    
+
     def _check_data_quality_issues(self, report: Dict) -> List[Dict]:
         """检查数据质量问题"""
         issues = []
-        
+
         stats = report.get('market_stats', {})
         data_quality_issues = stats.get('data_quality_issues', {})
-        
+
         # 检查零值问题
         if data_quality_issues.get('zero_values', 0) > 0:
             issues.append({
@@ -328,7 +328,7 @@ class FinancialReportSenderV3Fixed:
                     '零值数据将不会生成交易建议'
                 ]
             })
-        
+
         # 检查低质量数据
         if data_quality_issues.get('low_quality', 0) > 0:
             issues.append({
@@ -341,7 +341,7 @@ class FinancialReportSenderV3Fixed:
                     '建议结合其他信息源验证'
                 ]
             })
-        
+
         # 检查极端比例
         if data_quality_issues.get('extreme_ratios', 0) > 0:
             issues.append({
@@ -354,29 +354,29 @@ class FinancialReportSenderV3Fixed:
                     '极端比例数据将标记为异常'
                 ]
             })
-        
+
         return issues
-    
+
     def _format_percentage(self, value: float) -> str:
         """格式化百分比，添加颜色标记"""
         if math.isinf(value) or math.isnan(value):
             return f"🔴❌ 计算错误"
-        
+
         if value >= 0.20:  # ≥20%
             return f"🟢📈 +{value*100:.1f}%"
         elif value <= -0.20:  # ≤-20%
             return f"🔴📉 {value*100:.1f}%"
         else:  # -20% < value < 20%
             return f"🔵📊 {value*100:+.1f}%"
-    
+
     def generate_stock_analysis(self, stock: Dict) -> str:
         """生成单只股票的综合分析段落（使用修复后的建议）"""
         lines = []
-        
+
         # 股票标题
         holding_mark = "🎯 " if stock.get('is_holding', 0) else ""
         lines.append(f"### {holding_mark}**{stock['stock_name']} ({stock['stock_code']})**")
-        
+
         # 数据质量状态
         data_quality = stock.get('data_quality_score', 100)
         if data_quality >= 90:
@@ -385,14 +385,14 @@ class FinancialReportSenderV3Fixed:
             quality_status = f"⚠️ {data_quality}分"
         else:
             quality_status = f"❌ {data_quality}分"
-        
+
         lines.append(f"**📊 数据质量**: {quality_status}")
-        
+
         # 关键指标
         actual = stock.get('actual_value', 0)
         expected = stock.get('expected_value', 0)
         ratio = stock.get('surprise_ratio', 0)
-        
+
         # 检查数据异常
         if actual == 0 or expected == 0:
             lines.append(f"**🚨 数据异常**: 实际值或预期值为0，建议核实原始数据")
@@ -409,9 +409,9 @@ class FinancialReportSenderV3Fixed:
             else:
                 actual_fmt = f"{actual:.0f}"
                 expected_fmt = f"{expected:.0f}"
-            
+
             lines.append(f"- **{stock['metric']}**：`{actual_fmt}` vs 预期 `{expected_fmt}` **{self._format_percentage(ratio)}**")
-        
+
         # 行业信息
         industry = stock.get('industry', '未知')
         lines.append(f"- **行业**：

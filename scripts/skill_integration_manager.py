@@ -23,11 +23,11 @@ logger = logging.getLogger(__name__)
 
 class SkillIntegrationManager:
     """Skill集成管理器"""
-    
+
     def __init__(self, workspace_path: str = "/Users/ago/.openclaw/workspace"):
         self.workspace_path = Path(workspace_path)
         self.skills_dir = self.workspace_path / 'skills'
-        
+
         # 可用的Skill列表
         self.available_skills = {
             'data-quality-validator': {
@@ -49,7 +49,7 @@ class SkillIntegrationManager:
                 'dependencies': ['requests']
             }
         }
-        
+
         # 需要重构的现有系统
         self.systems_to_refactor = {
             '财报监控系统': {
@@ -68,29 +68,29 @@ class SkillIntegrationManager:
                 'priority': 3
             }
         }
-    
+
     def analyze_integration_points(self) -> Dict:
         """分析集成点"""
         logger.info("开始分析Skill集成点")
-        
+
         analysis = {
             'total_systems': len(self.systems_to_refactor),
             'integration_points': [],
             'estimated_effort': 0,
             'benefits': []
         }
-        
+
         for system_name, system_info in self.systems_to_refactor.items():
             system_path = self.workspace_path / system_info['path']
-            
+
             if not system_path.exists():
                 logger.warning(f"系统文件不存在: {system_path}")
                 continue
-            
+
             # 分析文件内容
             with open(system_path, 'r', encoding='utf-8') as f:
                 content = f.read()
-            
+
             integration_point = {
                 'system': system_name,
                 'file': system_info['path'],
@@ -98,21 +98,21 @@ class SkillIntegrationManager:
                 'lines_of_code': len(content.split('\n')),
                 'integration_opportunities': []
             }
-            
+
             # 查找可能的集成机会
             for skill_id in system_info['skills_needed']:
                 skill_info = self.available_skills.get(skill_id)
                 if not skill_info:
                     continue
-                
+
                 # 简单分析：查找重复代码模式
                 skill_keywords = self._get_skill_keywords(skill_id)
                 matches = []
-                
+
                 for keyword in skill_keywords:
                     if keyword in content:
                         matches.append(keyword)
-                
+
                 if matches:
                     integration_point['integration_opportunities'].append({
                         'skill': skill_id,
@@ -120,26 +120,26 @@ class SkillIntegrationManager:
                         'matches_found': matches,
                         'estimated_lines_to_replace': len(matches) * 10  # 粗略估计
                     })
-            
+
             analysis['integration_points'].append(integration_point)
             analysis['estimated_effort'] += len(integration_point['integration_opportunities']) * 2  # 小时
-        
+
         # 计算收益
         total_lines_to_replace = sum(
             sum(opp['estimated_lines_to_replace'] for opp in point['integration_opportunities'])
             for point in analysis['integration_points']
         )
-        
+
         analysis['benefits'] = [
             f"预计减少代码行数: {total_lines_to_replace}行",
             f"提高代码复用率: 预计提升30-50%",
             f"降低维护成本: 预计降低40-60%",
             f"提高系统稳定性: 使用经过验证的Skill模块"
         ]
-        
+
         logger.info(f"集成点分析完成: 发现{len(analysis['integration_points'])}个集成机会")
         return analysis
-    
+
     def _get_skill_keywords(self, skill_id: str) -> List[str]:
         """获取Skill关键词"""
         keywords_map = {
@@ -157,18 +157,18 @@ class SkillIntegrationManager:
             ]
         }
         return keywords_map.get(skill_id, [])
-    
+
     def create_integration_plan(self, analysis: Dict) -> Dict:
         """创建集成计划"""
         logger.info("创建Skill集成计划")
-        
+
         plan = {
             'phases': [],
             'timeline': {},
             'risks': [],
             'success_criteria': []
         }
-        
+
         # 第一阶段：财报监控系统集成（优先级最高）
         phase1 = {
             'name': '财报监控系统Skill集成',
@@ -184,7 +184,7 @@ class SkillIntegrationManager:
             'estimated_hours': 4,
             'priority': '高'
         }
-        
+
         # 第二阶段：股票池筛选系统集成
         phase2 = {
             'name': '股票池筛选系统Skill集成',
@@ -200,7 +200,7 @@ class SkillIntegrationManager:
             'estimated_hours': 6,
             'priority': '中'
         }
-        
+
         # 第三阶段：数据管道系统集成
         phase3 = {
             'name': '数据管道系统Skill集成',
@@ -216,13 +216,13 @@ class SkillIntegrationManager:
             'estimated_hours': 8,
             'priority': '中'
         }
-        
+
         plan['phases'] = [phase1, phase2, phase3]
-        
+
         # 时间线
         from datetime import datetime, timedelta
         today = datetime.now()
-        
+
         plan['timeline'] = {
             'phase1_start': today.strftime('%Y-%m-%d'),
             'phase1_end': (today + timedelta(days=1)).strftime('%Y-%m-%d'),
@@ -232,7 +232,7 @@ class SkillIntegrationManager:
             'phase3_end': (today + timedelta(days=7)).strftime('%Y-%m-%d'),
             'total_duration': '7天'
         }
-        
+
         # 风险
         plan['risks'] = [
             '现有系统依赖特定实现，集成可能破坏现有功能',
@@ -240,7 +240,7 @@ class SkillIntegrationManager:
             '集成后性能可能下降（需要优化）',
             '团队需要时间适应新的架构'
         ]
-        
+
         # 成功标准
         plan['success_criteria'] = [
             '所有集成系统通过测试',
@@ -249,28 +249,28 @@ class SkillIntegrationManager:
             '错误率降低30%以上',
             '开发效率提升25%以上'
         ]
-        
+
         logger.info("集成计划创建完成")
         return plan
-    
+
     def backup_system(self, system_path: str) -> bool:
         """备份系统"""
         source_path = self.workspace_path / system_path
-        
+
         if not source_path.exists():
             logger.error(f"系统文件不存在: {source_path}")
             return False
-        
+
         # 创建备份目录
         backup_dir = self.workspace_path / 'backups' / 'skill_integration'
         backup_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # 生成备份文件名
         from datetime import datetime
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         backup_name = f"{source_path.stem}_{timestamp}{source_path.suffix}"
         backup_path = backup_dir / backup_name
-        
+
         try:
             shutil.copy2(source_path, backup_path)
             logger.info(f"系统备份完成: {backup_path}")
@@ -278,7 +278,7 @@ class SkillIntegrationManager:
         except Exception as e:
             logger.error(f"备份失败: {e}")
             return False
-    
+
     def generate_integration_template(self, system_name: str, skill_id: str) -> str:
         """生成集成模板"""
         templates = {
@@ -342,9 +342,9 @@ else:
     logger.error(f"消息发送失败: {result.get('error', '未知错误')}")
 '''
         }
-        
+
         return templates.get(skill_id, '# 集成模板未找到')
-    
+
     def create_refactoring_guide(self) -> str:
         """创建重构指南"""
         guide = """# Skill集成重构指南
@@ -414,7 +414,7 @@ else:
 3. 收集用户反馈
 4. 持续优化改进
 """
-        
+
         return guide
 
 
@@ -423,42 +423,42 @@ def main():
     print("Skill集成管理器")
     print("版本: 1.0.0")
     print("=" * 60)
-    
+
     manager = SkillIntegrationManager()
-    
+
     print("1. 分析Skill集成点...")
     analysis = manager.analyze_integration_points()
-    
+
     print(f"\n分析结果:")
     print(f"  可重构系统: {analysis['total_systems']}个")
     print(f"  集成机会: {len(analysis['integration_points'])}个")
     print(f"  预计工作量: {analysis['estimated_effort']}小时")
-    
+
     print("\n2. 创建集成计划...")
     plan = manager.create_integration_plan(analysis)
-    
+
     print(f"\n集成计划概要:")
     print(f"  阶段数: {len(plan['phases'])}")
     print(f"  总时长: {plan['timeline']['total_duration']}")
-    
+
     print("\n3. 生成重构指南...")
     guide = manager.create_refactoring_guide()
-    
+
     # 保存指南
     guide_path = manager.workspace_path / 'docs' / 'skill_integration_guide.md'
     guide_path.parent.mkdir(parents=True, exist_ok=True)
-    
+
     with open(guide_path, 'w', encoding='utf-8') as f:
         f.write(guide)
-    
+
     print(f"\n指南已保存: {guide_path.relative_to(manager.workspace_path)}")
-    
+
     print("\n" + "=" * 60)
     print("下一步行动:")
     print("1. 查看详细分析报告")
     print("2. 开始第一阶段重构（财报监控系统）")
     print("3. 按照重构指南逐步实施")
-    
+
     print("\n建议:")
     print("✅ 从高优先级系统开始")
     print("✅ 充分测试每个步骤")

@@ -12,14 +12,14 @@ from datetime import datetime
 
 class TaskRouter:
     """智能任务路由器"""
-    
+
     def __init__(self):
         self.task_patterns = self._initialize_patterns()
         self.model_mapping = self._initialize_model_mapping()
-        
+
         print("🚀 智能路由系统初始化完成")
         print(f"📊 支持任务类型: {len(self.task_patterns)} 种")
-    
+
     def _initialize_patterns(self) -> Dict[str, Dict]:
         """初始化任务模式"""
         return {
@@ -94,7 +94,7 @@ class TaskRouter:
                 ]
             }
         }
-    
+
     def _initialize_model_mapping(self) -> Dict[str, str]:
         """初始化模型映射"""
         return {
@@ -107,27 +107,27 @@ class TaskRouter:
             'report_generation': 'r1',
             'default': 'v32'
         }
-    
+
     def classify_task(self, user_query: str) -> Tuple[str, str, Dict]:
         """分类任务类型并选择模型"""
         print(f"\n📥 用户查询: {user_query}")
-        
+
         # 清理查询
         cleaned_query = user_query.strip().lower()
-        
+
         # 计算每个任务类型的匹配分数
         scores = {}
         for task_type, pattern_info in self.task_patterns.items():
             score = self._calculate_match_score(cleaned_query, pattern_info)
             scores[task_type] = score
-        
+
         # 选择最高分的任务类型
         best_task = max(scores.items(), key=lambda x: x[1])
         task_type, score = best_task
-        
+
         # 选择模型
         model = self.model_mapping.get(task_type, self.model_mapping['default'])
-        
+
         # 构建结果
         result = {
             'task_type': task_type,
@@ -137,40 +137,40 @@ class TaskRouter:
             'timestamp': datetime.now().isoformat(),
             'all_scores': scores
         }
-        
+
         print(f"🎯 路由结果: {task_type} → {model.upper()}")
         print(f"📊 置信度: {score:.2%}")
-        
+
         return task_type, model, result
-    
+
     def _calculate_match_score(self, query: str, pattern_info: Dict) -> float:
         """计算匹配分数"""
         score = 0.0
-        
+
         # 关键词匹配
         keywords = pattern_info['keywords']
         for keyword in keywords:
             if keyword in query:
                 score += 0.3  # 每个关键词加0.3分
-        
+
         # 正则模式匹配
         patterns = self._get_patterns_for_task(pattern_info['description'])
         for pattern in patterns:
             if re.search(pattern, query, re.IGNORECASE):
                 score += 0.5  # 模式匹配加0.5分
-        
+
         # 长度权重（长查询更可能是深度分析）
         if len(query) > 50 and pattern_info['description'] in ['深度分析', '研报生成']:
             score += 0.4
-        
+
         # 问题词检测
         question_words = ['为什么', '如何', '怎样', '哪些', '什么']
         if any(word in query for word in question_words) and pattern_info['description'] in ['深度分析', '策略验证']:
             score += 0.3
-        
+
         # 确保分数在0-1之间
         return min(score, 1.0)
-    
+
     def _get_patterns_for_task(self, task_description: str) -> List[str]:
         """获取任务的正则模式"""
         patterns = {
@@ -199,9 +199,9 @@ class TaskRouter:
                 r'.*报告.*输出.*'
             ]
         }
-        
+
         return patterns.get(task_description, [])
-    
+
     def get_routing_decision_tree(self) -> str:
         """获取路由决策树"""
         tree = """
@@ -220,18 +220,18 @@ class TaskRouter:
 
 💡 设计原则:
 • 实时性优先 → V3.2
-• 成本敏感 → V3.2  
+• 成本敏感 → V3.2
 • 深度推理 → R1
 • 长文本输出 → R1
 • 工具调用 → V3.2
 """
         return tree
-    
+
     def test_routing_examples(self):
         """测试路由示例"""
         print("\n🧪 路由系统测试")
         print("=" * 50)
-        
+
         test_cases = [
             "今天茅台涨了没？",
             "比亚迪可以买吗？",
@@ -241,41 +241,41 @@ class TaskRouter:
             "验证这个动量策略是否有未来函数",
             "生成一份茅台深度研报"
         ]
-        
+
         for query in test_cases:
             task_type, model, result = self.classify_task(query)
             print(f"📝 '{query[:30]}...' → {task_type} → {model.upper()}")
-        
+
         print("\n✅ 路由测试完成")
 
 
 def main():
     """主函数"""
     router = TaskRouter()
-    
+
     # 显示路由决策树
     print(router.get_routing_decision_tree())
-    
+
     # 测试路由系统
     router.test_routing_examples()
-    
+
     # 交互式测试
     print("\n💬 交互式路由测试 (输入 'exit' 退出)")
     print("=" * 50)
-    
+
     while True:
         try:
             user_input = input("\n请输入查询: ").strip()
             if user_input.lower() in ['exit', 'quit', '退出']:
                 break
-            
+
             if user_input:
                 task_type, model, result = router.classify_task(user_input)
                 print(f"  任务类型: {result['task_type']}")
                 print(f"  选择模型: {model.upper()}")
                 print(f"  置信度: {result['confidence_score']:.2%}")
                 print(f"  描述: {result['description']}")
-        
+
         except KeyboardInterrupt:
             print("\n\n👋 退出路由测试")
             break

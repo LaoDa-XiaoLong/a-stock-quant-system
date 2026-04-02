@@ -2,7 +2,7 @@
             else:
                 step5_score = 2
                 reasons.append(f"大盘股({market_cap:.1f}亿)，不符合要求")
-            
+
             score += step5_score
             step_results.append({
                 "step": 5,
@@ -11,7 +11,7 @@
                 "passed": step5_score >= 8,
                 "reason": reasons[-1]
             })
-            
+
             # 步骤6: 技术空间筛选 (5%~10%)
             tech_space = data.get("technical_space", 0)  # 技术上涨空间
             if 8 <= tech_space <= 12:
@@ -23,7 +23,7 @@
             else:
                 step6_score = 3
                 reasons.append(f"技术空间一般({tech_space:.1f}%)")
-            
+
             score += step6_score
             step_results.append({
                 "step": 6,
@@ -32,13 +32,13 @@
                 "passed": step6_score >= 8,
                 "reason": reasons[-1]
             })
-            
+
             # 最终评分（0-100）
             final_score = min(int(score), 100)
-            
+
             # 杨永兴战法要求：至少通过4个步骤，且总分≥70
             passed_steps = sum(1 for step in step_results if step["passed"])
-            
+
             if passed_steps >= 4 and final_score >= 70:
                 stock_info = {
                     "code": code,
@@ -55,22 +55,22 @@
                     "overnight_strategy": True
                 }
                 selected_stocks.append(stock_info)
-        
+
         # 按评分排序
         selected_stocks.sort(key=lambda x: x["score"], reverse=True)
-        
+
         return selected_stocks
-    
+
     def calculate_overnight_entry_points(self, stock: Dict) -> Dict:
         """
         计算隔夜套利进场点位
         杨永兴战法：尾盘进场，次日冲高卖出
         """
         current_price = stock["current_price"]
-        
+
         # 基于评分的进场策略
         score = stock["score"]
-        
+
         if score >= 90:
             # 优质股票：激进进场
             entry_price = round(current_price * 1.005, 2)  # 上涨0.5%追入
@@ -89,7 +89,7 @@
             target_price = round(current_price * 1.05, 2)   # 目标涨幅5%
             stop_loss = round(current_price * 0.95, 2)      # 止损5%
             position = "轻仓（不超过10%）"
-        
+
         return {
             "entry_strategy": "尾盘隔夜套利",
             "entry_price": entry_price,
@@ -103,11 +103,11 @@
             "holding_period": "隔夜（今日尾盘进场，明日冲高卖出）",
             "exit_strategy": "次日冲高时卖出，不贪不恋"
         }
-    
+
     def generate_yang_yongxing_report(self, selected_stocks: List[Dict]) -> str:
         """生成杨永兴战法报告"""
         report_lines = []
-        
+
         report_lines.append("# 杨永兴隔夜套利战法 - 尾盘选股报告")
         report_lines.append(f"## 生成时间: {self.get_current_time().strftime('%Y-%m-%d %H:%M:%S')}")
         report_lines.append(f"## 策略作者: {self.strategy_author}")
@@ -115,34 +115,34 @@
         report_lines.append(f"## 策略版本: {self.strategy_name} {self.strategy_version}")
         report_lines.append(f"## 选股时间: {self.selection_time}")
         report_lines.append("")
-        
+
         report_lines.append("## 一、核心理念")
         for key, value in self.core_principles.items():
             report_lines.append(f"- **{key}**: {value}")
         report_lines.append("")
-        
+
         report_lines.append("## 二、六大选股步骤")
         for step in self.six_selection_steps:
             report_lines.append(f"{step['step']}. **{step['name']}**: {step['description']} - {step['criteria']}")
         report_lines.append("")
-        
+
         if not selected_stocks:
             report_lines.append("## 三、选股结果: 无符合条件的股票")
             return "\n".join(report_lines)
-        
+
         report_lines.append(f"## 三、选股结果: 共筛选出 {len(selected_stocks)} 只股票")
         report_lines.append("")
-        
+
         for i, stock in enumerate(selected_stocks[:5], 1):  # 只显示前5只
             entry_data = self.calculate_overnight_entry_points(stock)
-            
+
             report_lines.append(f"### {i}. {stock['name']} ({stock['code']})")
             report_lines.append(f"- **综合评分**: {stock['score']}/100")
             report_lines.append(f"- **通过步骤**: {stock['passed_steps']}/6")
             report_lines.append(f"- **当前价格**: {stock['current_price']:.2f}元")
             report_lines.append(f"- **今日涨跌**: {stock['change_percent']:.2f}%")
             report_lines.append("")
-            
+
             report_lines.append("#### 进场策略:")
             report_lines.append(f"- **策略**: {entry_data['entry_strategy']}")
             report_lines.append(f"- **进场价**: {entry_data['entry_price']:.2f}元 ({entry_data['entry_condition']})")
@@ -153,21 +153,21 @@
             report_lines.append(f"- **持有周期**: {entry_data['holding_period']}")
             report_lines.append(f"- **出场策略**: {entry_data['exit_strategy']}")
             report_lines.append("")
-            
+
             report_lines.append("#### 选股步骤详情:")
             for step_result in stock["step_results"]:
                 status = "✅" if step_result["passed"] else "❌"
                 report_lines.append(f"{status} **步骤{step_result['step']} {step_result['name']}**: {step_result['reason']} ({step_result['score']}分)")
             report_lines.append("")
-            
+
             report_lines.append("#### 主要选股理由:")
             for reason in stock['selection_reasons'][:6]:  # 显示前6个理由
                 report_lines.append(f"- {reason}")
-            
+
             report_lines.append("")
             report_lines.append("---")
             report_lines.append("")
-        
+
         report_lines.append("## 四、风险提示")
         report_lines.append("1. **隔夜风险**: 持有过夜存在不确定性")
         report_lines.append("2. **次日开盘**: 可能低开或不及预期")
@@ -175,28 +175,28 @@
         report_lines.append("4. **仓位控制**: 单只股票不超过总资金的30%")
         report_lines.append("5. **分散投资**: 建议分散到2-3只股票")
         report_lines.append("")
-        
+
         report_lines.append("## 五、操作建议")
         report_lines.append("1. **尾盘执行**: 严格在14:30之后进场")
         report_lines.append("2. **分批进场**: 可分批买入，降低风险")
         report_lines.append("3. **次日冲高卖出**: 不贪不恋，有利润就出")
         report_lines.append("4. **严格止损**: 达到止损位立即卖出")
         report_lines.append("5. **持续学习**: 总结经验，优化策略")
-        
+
         return "\n".join(report_lines)
-    
+
     def get_sample_stock_data(self):
         """获取示例股票数据（模拟）"""
         sample_stocks = {}
-        
+
         # 模拟10只股票数据
         for i in range(1, 11):
             code = f"600{i:03d}"
-            
+
             # 随机生成符合杨永兴战法的数据
             current_price = np.random.uniform(10, 50)
             change_percent = np.random.uniform(2, 6)  # 2-6%涨幅
-            
+
             sample_stocks[code] = {
                 "code": code,
                 "name": f"杨永兴示例股{i}",
@@ -207,9 +207,9 @@
                 "market_cap": np.random.uniform(50, 300),           # 市值50-300亿
                 "technical_space": np.random.uniform(5, 12)         # 技术空间5-12%
             }
-        
+
         return sample_stocks
-    
+
     def run_selection(self):
         """运行杨永兴战法选股"""
         print(f"开始执行杨永兴隔夜套利战法")
@@ -217,23 +217,23 @@
         print(f"历史业绩: {self.strategy_performance}")
         print(f"选股时间: {self.selection_time}")
         print("=" * 60)
-        
+
         # 检查时间窗口
         if not self.is_yang_yongxing_time():
             current_time = self.get_current_time().strftime("%H:%M:%S")
             print(f"当前时间 {current_time} 不在杨永兴战法时间窗口内")
             print(f"杨永兴战法时间窗口: {self.selection_time}")
             return None
-        
+
         # 获取股票数据
         stock_data = self.get_sample_stock_data()
         print(f"分析 {len(stock_data)} 只股票数据...")
-        
+
         # 应用选股标准
         selected_stocks = self.apply_yang_yongxing_criteria(stock_data)
-        
+
         print(f"筛选完成，共选出 {len(selected_stocks)} 只符合条件的股票")
-        
+
         if selected_stocks:
             print("\n前3只推荐股票:")
             for i, stock in enumerate(selected_stocks[:3], 1):
@@ -242,10 +242,10 @@
                 print(f"   评分: {stock['score']}分 | 通过步骤: {stock['passed_steps']}/6")
                 print(f"   进场价: {entry_data['entry_price']:.2f}元 | 目标价: {entry_data['target_price']:.2f}元")
                 print(f"   仓位: {entry_data['position_suggestion']}")
-        
+
         # 保存结果
         timestamp = self.get_current_time().strftime("%Y%m%d_%H%M%S")
-        
+
         # 保存JSON
         json_path = os.path.join(self.output_dir, f"yang_yongxing_selection_{timestamp}.json")
         with open(json_path, 'w', encoding='utf-8') as f:
@@ -257,17 +257,17 @@
                 "total_selected": len(selected_stocks),
                 "stocks": selected_stocks
             }, f, ensure_ascii=False, indent=2)
-        
+
         # 生成报告
         report_content = self.generate_yang_yongxing_report(selected_stocks)
         report_path = os.path.join(self.output_dir, f"yang_yongxing_report_{timestamp}.md")
         with open(report_path, 'w', encoding='utf-8') as f:
             f.write(report_content)
-        
+
         print(f"\n✅ 选股结果已保存:")
         print(f"  - JSON文件: {json_path}")
         print(f"  - 报告文件: {report_path}")
-        
+
         return {
             "selected_stocks": selected_stocks,
             "json_path": json_path,
@@ -278,10 +278,10 @@
 def main():
     """主函数"""
     strategy = YangYongxingOvernightStrategy()
-    
+
     # 运行选股
     result = strategy.run_selection()
-    
+
     if result:
         print("\n杨永兴隔夜套利战法执行完成！")
         print(f"详细报告请查看: {result['report_path']}")

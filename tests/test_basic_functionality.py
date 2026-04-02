@@ -15,30 +15,30 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + '/..')
 
 class TestBasicFunctionality(unittest.TestCase):
     """基础功能测试类"""
-    
+
     def test_project_structure(self):
         """测试项目结构"""
         # 检查必要的目录是否存在
         required_dirs = [
             'strategies',
-            'config', 
+            'config',
             'data',
             'logs',
             'reports',
             'tests'
         ]
-        
+
         for dir_name in required_dirs:
             dir_path = os.path.join(os.path.dirname(__file__), '..', dir_name)
             self.assertTrue(os.path.exists(dir_path), f"目录不存在: {dir_name}")
-    
+
     def test_config_files(self):
         """测试配置文件"""
         config_files = [
             'config/financial_monitor_config.json',
             'config/stock_pool_config.json'
         ]
-        
+
         for config_file in config_files:
             file_path = os.path.join(os.path.dirname(__file__), '..', config_file)
             if os.path.exists(file_path):
@@ -49,11 +49,11 @@ class TestBasicFunctionality(unittest.TestCase):
                         self.assertIsInstance(config_data, dict, f"配置文件不是有效的JSON字典: {config_file}")
                     except json.JSONDecodeError as e:
                         self.fail(f"配置文件JSON格式错误 {config_file}: {e}")
-    
+
     def test_python_files(self):
         """测试Python文件语法"""
         import subprocess
-        
+
         # 检查strategies目录下的Python文件
         strategies_dir = os.path.join(os.path.dirname(__file__), '..', 'strategies')
         if os.path.exists(strategies_dir):
@@ -67,9 +67,9 @@ class TestBasicFunctionality(unittest.TestCase):
                             capture_output=True,
                             text=True
                         )
-                        self.assertEqual(result.returncode, 0, 
+                        self.assertEqual(result.returncode, 0,
                                        f"Python文件语法错误 {file_path}: {result.stderr}")
-    
+
     def test_import_modules(self):
         """测试模块导入"""
         # 测试是否能导入一些关键模块
@@ -81,7 +81,7 @@ class TestBasicFunctionality(unittest.TestCase):
 
 class TestDataQuality(unittest.TestCase):
     """数据质量测试"""
-    
+
     def test_data_directory(self):
         """测试数据目录"""
         data_dir = os.path.join(os.path.dirname(__file__), '..', 'data')
@@ -89,7 +89,7 @@ class TestDataQuality(unittest.TestCase):
             # 检查数据目录是否可访问
             self.assertTrue(os.access(data_dir, os.R_OK), "数据目录不可读")
             self.assertTrue(os.access(data_dir, os.W_OK), "数据目录不可写")
-    
+
     def test_logs_directory(self):
         """测试日志目录"""
         logs_dir = os.path.join(os.path.dirname(__file__), '..', 'logs')

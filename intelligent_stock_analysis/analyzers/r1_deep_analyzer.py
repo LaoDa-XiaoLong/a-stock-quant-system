@@ -13,15 +13,15 @@ import textwrap
 
 class R1DeepAnalyzer:
     """R1 深度分析器"""
-    
+
     def __init__(self):
         self.analyzer_name = "R1 深度分析器 v1.0"
         self.analysis_frameworks = self._initialize_frameworks()
         self.report_templates = self._initialize_templates()
-        
+
         print(f"🚀 {self.analyzer_name} 初始化完成")
         print(f"📊 支持分析框架: {len(self.analysis_frameworks)} 种")
-    
+
     def _initialize_frameworks(self) -> Dict[str, Dict]:
         """初始化分析框架"""
         return {
@@ -116,7 +116,7 @@ class R1DeepAnalyzer:
                 ]
             }
         }
-    
+
     def _initialize_templates(self) -> Dict[str, str]:
         """初始化报告模板"""
         return {
@@ -173,28 +173,28 @@ class R1DeepAnalyzer:
 {risk_comparison}
 """
         }
-    
+
     def analyze_with_chain_of_thought(self, r1_input: Dict[str, Any]) -> Dict[str, Any]:
         """带思维链的深度分析"""
         print(f"\n🧠 R1 开始深度分析")
         print(f"  分析类型: {r1_input['analysis_request']['analysis_type']}")
         print(f"  原始查询: {r1_input['analysis_request']['original_query']}")
-        
+
         # 提取分析类型
         analysis_type = r1_input['analysis_request']['analysis_type']
-        
+
         # 获取分析框架
         framework = self.analysis_frameworks.get(
-            analysis_type, 
+            analysis_type,
             self.analysis_frameworks['investment_analysis']
         )
-        
+
         # 执行思维链分析
         thought_chain = self._execute_thought_chain(r1_input, framework)
-        
+
         # 生成结构化报告
         report = self._generate_structured_report(r1_input, thought_chain, framework)
-        
+
         # 构建分析结果
         result = {
             'analysis_id': f"R1_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
@@ -212,24 +212,24 @@ class R1DeepAnalyzer:
                 'data_quality_score': r1_input['context_information']['data_quality']['overall_rating']
             }
         }
-        
+
         print(f"\n✅ R1 深度分析完成")
         print(f"  分析ID: {result['analysis_id']}")
         print(f"  关键发现: {len(result['key_findings'])} 个")
         print(f"  建议数量: {len(result['recommendations'])} 个")
         print(f"  风险识别: {len(result['risks_identified'])} 个")
-        
+
         return result
-    
+
     def _execute_thought_chain(self, r1_input: Dict, framework: Dict) -> List[Dict[str, Any]]:
         """执行思维链分析"""
         thought_chain = []
-        
+
         print(f"\n🔍 执行思维链分析:")
-        
+
         for step in framework['steps']:
             print(f"  {step}")
-            
+
             # 模拟每一步的思考过程
             thought = {
                 'step': step,
@@ -239,15 +239,15 @@ class R1DeepAnalyzer:
                 'assumptions': self._identify_assumptions(step),
                 'confidence': round(np.random.uniform(0.7, 0.95), 2)
             }
-            
+
             thought_chain.append(thought)
-        
+
         return thought_chain
-    
+
     def _simulate_thinking(self, step: str, r1_input: Dict) -> str:
         """模拟思考过程"""
         # 这里模拟R1的思考过程，实际实现会调用R1 API
-        
+
         thinking_templates = {
             '财务数据验证和质量评估': """
 首先验证财务数据的完整性和准确性：
@@ -288,20 +288,20 @@ class R1DeepAnalyzer:
 竞争地位：在{industry_name}行业中处于{position_desc}位置。
 """
         }
-        
+
         # 简单匹配逻辑
         for key in thinking_templates:
             if key in step:
                 return thinking_templates[key]
-        
+
         return f"执行分析步骤：{step}\n基于提供的数据进行深入分析和逻辑推理。"
-    
+
     def _simulate_conclusions(self, step: str, r1_input: Dict) -> List[str]:
         """模拟分析结论"""
         import numpy as np
-        
+
         conclusions = []
-        
+
         if '财务' in step:
             conclusions.extend([
                 "财务数据质量良好，可用于深度分析",
@@ -328,46 +328,46 @@ class R1DeepAnalyzer:
             ])
         else:
             conclusions.append(f"完成{step}的分析，结果可用于后续决策")
-        
+
         return conclusions[:3]  # 返回前3个结论
-    
+
     def _identify_data_used(self, step: str, r1_input: Dict) -> List[str]:
         """识别使用的数据"""
         data_used = []
-        
+
         if '财务' in step:
             data_used.extend(['revenue', 'net_profit', 'cash_flow', 'balance_sheet'])
         if '估值' in step:
             data_used.extend(['pe_ratio', 'pb_ratio', 'growth_rate', 'discount_rate'])
         if '市场' in step:
             data_used.extend(['market_data', 'industry_data', 'competitor_data'])
-        
+
         return list(set(data_used))  # 去重
-    
+
     def _identify_assumptions(self, step: str) -> List[str]:
         """识别分析假设"""
         assumptions = []
-        
+
         if '增长' in step:
             assumptions.append("假设公司维持当前增长趋势")
         if '估值' in step:
             assumptions.append("假设折现率保持稳定")
         if '风险' in step:
             assumptions.append("假设市场环境不发生剧烈变化")
-        
+
         if not assumptions:
             assumptions.append("基于当前可用数据和合理假设")
-        
+
         return assumptions
-    
+
     def _generate_structured_report(self, r1_input: Dict, thought_chain: List[Dict], framework: Dict) -> str:
         """生成结构化报告"""
         print(f"\n📋 生成结构化报告")
-        
+
         # 选择模板
         template_type = 'comparative_report' if 'comparative' in r1_input['analysis_request']['analysis_type'] else 'structured_report'
         template = self.report_templates[template_type]
-        
+
         # 准备模板数据
         template_data = {
             'title': f"{r1_input['analysis_request']['original_query']} - 深度分析报告",
@@ -381,7 +381,7 @@ class R1DeepAnalyzer:
             'monitoring_metrics': self._generate_monitoring_metrics(thought_chain),
             'analysis_limitations': self._generate_analysis_limitations(r1_input)
         }
-        
+
         # 如果是对比报告，添加额外字段
         if template_type == 'comparative_report':
             template_data.update({
@@ -393,16 +393,16 @@ class R1DeepAnalyzer:
                 'investment_recommendation': self._generate_investment_recommendation(thought_chain),
                 'risk_comparison': self._generate_risk_comparison(thought_chain)
             })
-        
+
         # 填充模板
         report = template.format(**template_data)
-        
+
         print(f"✅ 报告生成完成")
         print(f"  报告类型: {template_type}")
         print(f"  报告长度: 约{len(report.split())}字")
-        
+
         return report
-    
+
     def _generate_executive_summary(self, thought_chain: List[Dict]) -> str:
         """生成执行摘要"""
         summary = """
@@ -417,23 +417,23 @@ class R1DeepAnalyzer:
 **核心结论**：公司基本面扎实，增长前景明确，风险可控，建议积极关注。
 """
         return summary
-    
+
     def _generate_detailed_analysis(self, thought_chain: List[Dict]) -> str:
         """生成详细分析"""
         analysis = ""
-        
+
         for thought in thought_chain:
             analysis += f"### {thought['step']}\n\n"
             analysis += f"{thought['thinking_process']}\n\n"
-            
+
             if thought['conclusions']:
                 analysis += "**主要结论**:\n"
                 for conclusion in thought['conclusions']:
                     analysis += f"- {conclusion}\n"
                 analysis += "\n"
-        
+
         return analysis
-    
+
     def _generate_risk_warnings(self, thought_chain: List[Dict]) -> str:
         """生成风险提示"""
         risks = """
@@ -457,18 +457,53 @@ class R1DeepAnalyzer:
 **风险等级评估**：中等偏高，需要密切监控。
 """
         return risks
-    
+
     def _generate_investment_recommendations(self, thought_chain: List[Dict]) -> str:
         """生成投资建议"""
-        recommendations = """
+        # 从thought_chain中提取估值信息
+        valuation_data = self._extract_valuation_data(thought_chain)
+        
+        # 设置默认值
+        target_price_low = valuation_data.get('target_price_low', '待计算')
+        target_price_high = valuation_data.get('target_price_high', '待计算')
+        upside_potential = valuation_data.get('upside_potential', '待计算')
+        position_size = valuation_data.get('position_size', '5-10%')
+        entry_price = valuation_data.get('entry_price', '合理估值区间')
+        
+        recommendations = f"""
 ## 💡 投资建议
 
 ### 1. 投资评级：**买入**
-- **目标价格**：基于估值分析，合理目标价格区间为 XXX-XXX 元
-- **上涨空间**：当前价格相比目标价有 XX-XX% 上涨空间
+- **目标价格**：基于估值分析，合理目标价格区间为 {target_price_low}-{target_price_high} 元
+- **上涨空间**：当前价格相比目标价有 {upside_potential} 上涨空间
 - **投资期限**：建议 6-12 个月投资期限
 
 ### 2. 仓位建议
-- **核心仓位**：建议配置总资产的 XX-XX%
-- **建仓策略**：分批建仓，在 XXX 元以下逐步买入
-- **加仓
+- **核心仓位**：建议配置总资产的 {position_size}
+- **建仓策略**：分批建仓，在 {entry_price} 元以下逐步买入
+- **加仓条件**：股价回调至支撑位或基本面持续改善时
+- **减仓条件**：达到目标价格或基本面恶化时
+
+### 3. 风险管理
+- **止损位**：建议设置在成本价的 -15%
+- **仓位调整**：根据市场环境动态调整仓位
+- **风险控制**：单只股票仓位不超过总资产的 20%
+
+### 4. 监控要点
+- **基本面**：季度财报、行业政策变化
+- **技术面**：关键支撑阻力位、成交量变化
+- **市场面**：板块轮动、资金流向
+"""
+        return recommendations
+    
+    def _extract_valuation_data(self, thought_chain: List[Dict]) -> Dict[str, str]:
+        """从思维链中提取估值数据"""
+        valuation_data = {}
+        
+        # 尝试从thought_chain中提取估值信息
+        for thought in thought_chain:
+            if 'valuation' in thought.get('step_name', '').lower():
+                # 这里可以添加具体的估值数据提取逻辑
+                pass
+        
+        return valuation_data

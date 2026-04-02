@@ -12,10 +12,10 @@ import numpy as np
 
 class R1DeepAnalyzerComplete:
     """R1 深度分析器（完整版）"""
-    
+
     def __init__(self):
         self.analyzer_name = "R1 深度分析器 v1.0"
-        
+
     def _generate_investment_recommendations(self, thought_chain: List[Dict]) -> str:
         """生成投资建议"""
         recommendations = """
@@ -43,7 +43,7 @@ class R1DeepAnalyzerComplete:
 - **市场面**：行业政策、竞争格局、市场情绪
 """
         return recommendations
-    
+
     def _generate_monitoring_metrics(self, thought_chain: List[Dict]) -> str:
         """生成监控指标"""
         metrics = """
@@ -71,7 +71,7 @@ class R1DeepAnalyzerComplete:
 - **夏普比率**：风险调整后收益
 """
         return metrics
-    
+
     def _generate_analysis_limitations(self, r1_input: Dict) -> str:
         """生成分析限制"""
         limitations = """
@@ -98,7 +98,7 @@ class R1DeepAnalyzerComplete:
 - **风险自担**：投资有风险，决策需谨慎
 """
         return limitations
-    
+
     def _generate_comparison_summary(self, thought_chain: List[Dict]) -> str:
         """生成对比摘要（用于对比报告）"""
         summary = """
@@ -117,7 +117,7 @@ class R1DeepAnalyzerComplete:
 - **比亚迪**：适合看好全产业链和成本优势的投资者
 """
         return summary
-    
+
     def _generate_detailed_comparison(self, thought_chain: List[Dict]) -> str:
         """生成详细对比"""
         comparison = """
@@ -148,7 +148,7 @@ class R1DeepAnalyzerComplete:
 | 研发投入 | 高研发强度 | 全产业链研发 |
 """
         return comparison
-    
+
     def _generate_comprehensive_evaluation(self, thought_chain: List[Dict]) -> str:
         """生成综合评估"""
         evaluation = """
@@ -181,7 +181,7 @@ class R1DeepAnalyzerComplete:
 **评分**：7.8/10
 """
         return evaluation
-    
+
     def _generate_investment_recommendation(self, thought_chain: List[Dict]) -> str:
         """生成投资推荐（对比报告）"""
         recommendation = """
@@ -211,7 +211,7 @@ class R1DeepAnalyzerComplete:
 - **保守组合**：比亚迪 80% + 现金 20%
 """
         return recommendation
-    
+
     def _generate_risk_comparison(self, thought_chain: List[Dict]) -> str:
         """生成风险对比"""
         risk_comparison = """
@@ -238,7 +238,7 @@ class R1DeepAnalyzerComplete:
 - **比亚迪**：中等（经营风险+竞争风险）
 """
         return risk_comparison
-    
+
     def _extract_key_findings(self, thought_chain: List[Dict]) -> List[str]:
         """提取关键发现"""
         findings = [
@@ -249,7 +249,7 @@ class R1DeepAnalyzerComplete:
             "风险可控，主要风险来自行业竞争和政策变化"
         ]
         return findings
-    
+
     def _extract_recommendations(self, thought_chain: List[Dict]) -> List[Dict]:
         """提取建议"""
         recommendations = [
@@ -279,7 +279,7 @@ class R1DeepAnalyzerComplete:
             }
         ]
         return recommendations
-    
+
     def _extract_risks(self, thought_chain: List[Dict]) -> List[Dict]:
         """提取风险"""
         risks = [
@@ -313,13 +313,13 @@ class R1DeepAnalyzerComplete:
             }
         ]
         return risks
-    
+
     def demonstrate_analysis(self):
         """演示分析能力"""
         print("\n" + "=" * 70)
         print("🧠 R1 深度分析演示")
         print("=" * 70)
-        
+
         # 模拟R1输入
         r1_input = {
             'analysis_request': {
@@ -337,11 +337,11 @@ class R1DeepAnalyzerComplete:
                 'data_quality': {'overall_rating': 'good'}
             }
         }
-        
+
         print(f"\n1. 接收分析任务...")
         print(f"   查询: {r1_input['analysis_request']['original_query']}")
         print(f"   类型: {r1_input['analysis_request']['analysis_type']}")
-        
+
         print(f"\n2. 执行思维链分析...")
         thought_chain = []
         steps = [
@@ -352,16 +352,16 @@ class R1DeepAnalyzerComplete:
             "风险因素全面评估",
             "投资价值综合判断"
         ]
-        
+
         for step in steps:
             print(f"   • {step}")
             thought_chain.append({
                 'step': step,
                 'conclusions': [f"完成{step}的分析"]
             })
-        
+
         print(f"\n3. 生成结构化报告...")
-        
+
         # 生成报告摘要
         report_summary = """
 📊 宁德时代 vs 比亚迪 深度对比分析报告
@@ -382,18 +382,18 @@ class R1DeepAnalyzerComplete:
 • 政策变化不确定性
 • 技术迭代风险
 """
-        
+
         print(report_summary)
-        
+
         print(f"\n4. 提取关键信息...")
         key_findings = self._extract_key_findings(thought_chain)
         recommendations = self._extract_recommendations(thought_chain)
         risks = self._extract_risks(thought_chain)
-        
+
         print(f"   关键发现: {len(key_findings)} 个")
         print(f"   投资建议: {len(recommendations)} 个")
         print(f"   风险识别: {len(risks)} 个")
-        
+
         print(f"\n✅ R1 深度分析演示完成")
 
 

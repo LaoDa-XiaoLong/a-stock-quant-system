@@ -36,12 +36,12 @@ def main():
     if len(sys.argv) < 2:
         print_help()
         return 1
-    
+
     command = sys.argv[1]
-    
+
     # 初始化版本管理器
     vm = VersionManager()
-    
+
     try:
         if command == "list":
             if len(sys.argv) == 2:
@@ -53,21 +53,21 @@ def main():
             else:
                 print("❌ 参数错误")
                 print_help()
-        
+
         elif command == "create":
             if len(sys.argv) != 6:
                 print("❌ 参数错误，需要5个参数")
                 print("用法: create <category> <subcategory> <version> <source_path>")
                 return 1
-            
+
             category = sys.argv[2]
             subcategory = sys.argv[3]
             version = sys.argv[4]
             source_path = sys.argv[5]
-            
+
             # 先创建类别（如果不存在）
             vm.create_category(category, subcategory, f"{subcategory}版本管理")
-            
+
             # 创建版本
             success = vm.create_version(
                 category=category,
@@ -77,62 +77,62 @@ def main():
                 author="小龙",
                 description=f"{subcategory} {version} 版本"
             )
-            
+
             if success:
                 print(f"✅ 版本创建成功: {category}/{subcategory}/{version}")
             else:
                 print(f"❌ 版本创建失败")
-        
+
         elif command == "switch":
             if len(sys.argv) != 5:
                 print("❌ 参数错误，需要4个参数")
                 print("用法: switch <category> <subcategory> <version>")
                 return 1
-            
+
             category = sys.argv[2]
             subcategory = sys.argv[3]
             version = sys.argv[4]
-            
+
             success = vm.switch_version(category, subcategory, version)
             if success:
                 print(f"✅ 版本切换成功: {category}/{subcategory} → {version}")
             else:
                 print(f"❌ 版本切换失败")
-        
+
         elif command == "compare":
             if len(sys.argv) != 6:
                 print("❌ 参数错误，需要5个参数")
                 print("用法: compare <category> <subcategory> <ver1> <ver2>")
                 return 1
-            
+
             category = sys.argv[2]
             subcategory = sys.argv[3]
             ver1 = sys.argv[4]
             ver2 = sys.argv[5]
-            
+
             vm.compare_versions(category, subcategory, ver1, ver2)
-        
+
         elif command == "info":
             if len(sys.argv) != 4:
                 print("❌ 参数错误，需要3个参数")
                 print("用法: info <category> <subcategory>")
                 return 1
-            
+
             category = sys.argv[2]
             subcategory = sys.argv[3]
-            
+
             vm.list_versions(category, subcategory)
-        
+
         elif command == "help":
             print_help()
-        
+
         else:
             print(f"❌ 未知命令: {command}")
             print_help()
             return 1
-        
+
         return 0
-    
+
     except Exception as e:
         print(f"❌ 执行失败: {e}")
         import traceback

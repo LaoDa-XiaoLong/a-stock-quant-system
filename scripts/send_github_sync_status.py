@@ -14,7 +14,7 @@ import requests
 def check_github_sync():
     """检查GitHub同步状态"""
     workspace = "/Users/ago/.openclaw/workspace"
-    
+
     # 运行GitHub同步检查
     try:
         result = subprocess.run(
@@ -24,14 +24,14 @@ def check_github_sync():
             text=True,
             timeout=30
         )
-        
+
         output = result.stdout
         return_code = result.returncode
-        
+
         # 解析输出
         sync_status = "未知"
         changes = "无变更"
-        
+
         if "没有变更需要提交" in output:
             sync_status = "✅ 同步完成 - 没有变更"
         elif "变更已提交" in output or "变更已推送" in output:
@@ -44,7 +44,7 @@ def check_github_sync():
         elif "错误" in output or "失败" in output or "error" in output.lower():
             sync_status = "❌ 同步失败"
             changes = output[-200:]  # 取最后200字符作为错误信息
-        
+
         return {
             "status": sync_status,
             "changes": changes,
@@ -52,7 +52,7 @@ def check_github_sync():
             "return_code": return_code,
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
-        
+
     except subprocess.TimeoutExpired:
         return {
             "status": "❌ 同步超时",
@@ -74,11 +74,11 @@ def send_to_feishu_group(sync_info):
     """发送到飞书工作群"""
     # 工作沟通汇报群Webhook地址
     webhook_url = "https://open.feishu.cn/open-apis/bot/v2/hook/7c6e2bb9-0f2f-4d16-ade1-e93cf6bd3065"
-    
+
     # 根据状态选择颜色
     status = sync_info["status"]
     template = "green" if "✅" in status else "red"
-    
+
     # 创建飞书消息
     message = {
         "msg_type": "interactive",
@@ -123,7 +123,7 @@ def send_to_feishu_group(sync_info):
             ]
         }
     }
-    
+
     try:
         response = requests.post(webhook_url, json=message, timeout=10)
         if response.status_code == 200:
@@ -146,35 +146,35 @@ def send_to_feishu_group(sync_info):
 def main():
     print("🔄 检查并发送GitHub同步状态到工作群")
     print("=" * 50)
-    
+
     # 检查GitHub同步状态
     print("🔍 检查GitHub同步状态...")
     sync_info = check_github_sync()
-    
+
     print(f"✅ 同步状态检查完成")
     print(f"   状态: {sync_info['status']}")
     print(f"   变更: {sync_info['changes']}")
-    
+
     # 发送到工作群
     success = send_to_feishu_group(sync_info)
-    
+
     if success:
         # 记录发送日志
         log_dir = "/Users/ago/.openclaw/workspace/logs/github_sync_send"
         os.makedirs(log_dir, exist_ok=True)
         log_file = os.path.join(log_dir, f"send_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
-        
+
         log_data = {
             "timestamp": datetime.now().isoformat(),
             "sync_info": sync_info,
             "send_status": "success"
         }
-        
+
         with open(log_file, 'w', encoding='utf-8') as f:
             json.dump(log_data, f, ensure_ascii=False, indent=2)
-        
+
         print(f"✅ 发送日志已保存: {log_file}")
-    
+
     return success
 
 if __name__ == "__main__":

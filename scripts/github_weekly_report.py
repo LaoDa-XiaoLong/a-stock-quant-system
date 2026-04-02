@@ -7,11 +7,11 @@ import os
 def main():
     print(f"📊 GitHub维护周报 - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("=" * 60)
-    
+
     # 模拟周报数据
     week_start = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
     week_end = datetime.now().strftime('%Y-%m-%d')
-    
+
     report = {
         "period": f"{week_start} 至 {week_end}",
         "commits": 15,
@@ -36,15 +36,15 @@ def main():
         },
         "generated_at": datetime.now().isoformat()
     }
-    
+
     # 保存报告
     report_dir = "logs/github_weekly"
     os.makedirs(report_dir, exist_ok=True)
     report_file = f"{report_dir}/github_weekly_{datetime.now().strftime('%Y%m%d')}.json"
-    
+
     with open(report_file, 'w', encoding='utf-8') as f:
         json.dump(report, f, ensure_ascii=False, indent=2)
-    
+
     print(f"周报生成: {report_file}")
     print(f"统计周期: {report['period']}")
     print(f"提交次数: {report['commits']}次")
