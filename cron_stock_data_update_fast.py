@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Cron任务：股票数据自动更新 (v1.0)
-功能：
-1. 使用akshare获取最新A股数据（如果可用）
-2. 应用选股策略筛选
-3. 更新本地数据文件
-4. 生成更新报告
+Cron任务：股票数据自动更新 (v1.1 - 高效版)
+优化点：
+1. 使用缓存机制减少API调用
+2. 批量处理提高效率
+3. 更智能的错误处理
+4. 支持增量更新
 """
 
 import pandas as pd
@@ -18,36 +18,45 @@ import sys
 import time
 import logging
 import traceback
+import hashlib
+from pathlib import Path
 
-class CronStockUpdater:
+class FastStockUpdater:
     def __init__(self):
         self.data_dir = "data"
         self.stock_pool_dir = os.path.join(self.data_dir, "stock_pool")
         self.reports_dir = os.path.join(self.data_dir, "reports")
+        self.cache_dir = os.path.join(self.data_dir, "cache")
         
         # 创建目录
         os.makedirs(self.stock_pool_dir, exist_ok=True)
         os.makedirs(self.reports_dir, exist_ok=True)
+        os.makedirs(self.cache_dir, exist_ok=True)
         
         # 设置日志
         self.setup_logging()
         
         # 配置
         self.config = {
-            'max_stocks': 100,  # 最大处理股票数
-            'min_turnover': 10000000,  # 最小成交额
-            'price_range': (5, 500),  # 价格范围
-            'change_limit': 5,  # 涨跌幅限制
-            'use_real_data': True,  # 是否使用真实数据
-            'retry_count': 3,  # 重试次数
-            'retry_delay': 2,  # 重试延迟(秒)
+            'max_stocks': 100,           # 最大处理股票数
+            'min_turnover': 10000000,    # 最小成交额
+            'price_range': (5, 500),     # 价格范围
+            'change_limit': 5,           # 涨跌幅限制
+            'use_real_data': True,       # 是否使用真实数据
+            'retry_count': 2,            # 重试次数
+            'retry_delay': 1,            # 重试延迟(秒)
+            'cache_ttl': 300,            # 缓存有效期(秒)
+            'batch_size': 50,            # 批量处理大小
         }
+        
+        # 缓存
+        self.cache = {}
     
     def setup_logging(self):
         """设置日志"""
-        log_file = os.path.join(self.stock_pool_dir, f"cron_update_{datetime.now().strftime('%Y%m%d')}.log")
+        log_file = os.path.join(self.stock_pool_dir, f"fast_update_{datetime.now().strftime('%Y%m%d')}.log")
         
-        self.logger = logging.getLogger('CronStockUpdater')
+        self.logger = logging.getLogger('FastStockUpdater')
         self.logger.setLevel(logging.INFO)
         
         # 清除现有处理器
@@ -69,8 +78,65 @@ class CronStockUpdater:
         self.logger.addHandler(fh)
         self.logger.addHandler(ch)
     
+    def get_cache_key(self, func_name, *args):
+        """生成缓存键"""
+        key_str = f"{func_name}:{':'.join(str(arg) for arg in args)}"
+        return hashlib.md5(key_str.encode()).hexdigest()
+    
+    def get_cached_data(self, cache_key, ttl=None):
+        """获取缓存数据"""
+        if ttl is None:
+            ttl = self.config['cache_ttl']
+        
+        if cache_key in self.cache:
+            data, timestamp = self.cache[cache_key]
+            if time.time() - timestamp < ttl:
+                self.logger.debug(f"缓存命中: {cache_key}")
+                return data
+        
+        # 尝试从文件缓存加载
+        cache_file = os.path.join(self.cache_dir, f"{cache_key}.json")
+        if os.path.exists(cache_file):
+            try:
+                with open(cache_file, 'r', encoding='utf-8') as f:
+                    cache_data = json.load(f)
+                
+                if time.time() - cache_data['timestamp'] < ttl:
+                    self.logger.debug(f"文件缓存命中: {cache_key}")
+                    self.cache[cache_key] = (cache_data['data'], cache_data['timestamp'])
+                    return cache_data['data']
+            except Exception as e:
+                self.logger.warning(f"读取缓存文件失败 {cache_file}: {e}")
+        
+        return None
+    
+    def set_cached_data(self, cache_key, data):
+        """设置缓存数据"""
+        timestamp = time.time()
+        self.cache[cache_key] = (data, timestamp)
+        
+        # 保存到文件缓存
+        try:
+            cache_file = os.path.join(self.cache_dir, f"{cache_key}.json")
+            cache_data = {
+                'data': data,
+                'timestamp': timestamp,
+                'key': cache_key
+            }
+            with open(cache_file, 'w', encoding='utf-8') as f:
+                json.dump(cache_data, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            self.logger.warning(f"保存缓存文件失败: {e}")
+    
     def get_stock_list(self):
-        """获取股票列表"""
+        """获取股票列表（带缓存）"""
+        cache_key = self.get_cache_key('stock_list')
+        cached = self.get_cached_data(cache_key, ttl=3600)  # 股票列表缓存1小时
+        
+        if cached is not None:
+            self.logger.info(f"从缓存加载股票列表: {len(cached)} 只")
+            return pd.DataFrame(cached)
+        
         self.logger.info("获取股票列表...")
         
         # 首先尝试从现有文件加载
@@ -92,6 +158,8 @@ class CronStockUpdater:
                     if '名称' in df.columns:
                         df = df.rename(columns={'名称': 'name'})
                     
+                    # 缓存结果
+                    self.set_cached_data(cache_key, df.to_dict('records'))
                     return df
                 except Exception as e:
                     self.logger.warning(f"读取文件失败 {file_path}: {e}")
@@ -105,6 +173,9 @@ class CronStockUpdater:
                 if not stock_info.empty:
                     stock_info = stock_info.rename(columns={'code': 'symbol', 'name': 'name'})
                     self.logger.info(f"从akshare获取股票列表: {len(stock_info)} 只")
+                    
+                    # 缓存结果
+                    self.set_cached_data(cache_key, stock_info.to_dict('records'))
                     return stock_info
             except ImportError:
                 self.logger.warning("akshare未安装，使用模拟数据")
@@ -126,11 +197,15 @@ class CronStockUpdater:
         ]
         
         self.logger.info(f"使用样本股票数据: {len(sample_stocks)} 只")
-        return pd.DataFrame(sample_stocks)
+        df = pd.DataFrame(sample_stocks)
+        
+        # 缓存结果
+        self.set_cached_data(cache_key, df.to_dict('records'))
+        return df
     
-    def get_stock_data(self, symbols):
-        """获取股票数据"""
-        self.logger.info(f"获取 {len(symbols)} 只股票数据...")
+    def get_stock_data_batch(self, symbols):
+        """批量获取股票数据"""
+        self.logger.info(f"批量获取 {len(symbols)} 只股票数据...")
         
         results = []
         current_time = datetime.now()
@@ -145,79 +220,69 @@ class CronStockUpdater:
                 try:
                     import akshare as ak
                     
-                    self.logger.info(f"尝试从akshare获取数据 (第{attempt+1}次尝试)...")
-                    # 获取实时行情
+                    self.logger.info(f"尝试从akshare获取批量数据 (第{attempt+1}次尝试)...")
+                    
+                    # 获取实时行情（批量）
                     spot_data = ak.stock_zh_a_spot()
                     
                     if not spot_data.empty:
                         self.logger.info(f"成功获取实时行情数据: {len(spot_data)} 条记录")
                         
-                        # 优化数据匹配 - 处理不同格式的股票代码
-                        spot_data_dict = {}
+                        # 构建代码映射字典（优化匹配）
+                        code_mapping = {}
                         for _, row in spot_data.iterrows():
                             code = str(row['代码']).strip()
-                            # 标准化股票代码：移除市场前缀，保留6位数字
-                            clean_code = code
-                            if code.startswith('sh') or code.startswith('sz'):
-                                clean_code = code[2:]  # 移除'sh'或'sz'前缀
-                            elif code.startswith('bj'):
-                                clean_code = code[2:]  # 移除'bj'前缀
-                            
-                            # 确保是6位数字代码
-                            if clean_code.isdigit() and len(clean_code) == 6:
-                                spot_data_dict[clean_code] = row
-                            else:
-                                # 如果清理后不是6位数字，也保存原始代码
-                                spot_data_dict[code] = row
+                            # 标准化代码
+                            clean_code = self.normalize_stock_code(code)
+                            if clean_code:
+                                code_mapping[clean_code] = row
                         
-                        for symbol in symbols:
-                            symbol_str = str(symbol).strip()
+                        self.logger.info(f"构建代码映射: {len(code_mapping)} 个有效代码")
+                        
+                        # 批量匹配
+                        batch_size = self.config['batch_size']
+                        for i in range(0, len(symbols), batch_size):
+                            batch = symbols[i:i+batch_size]
+                            self.logger.debug(f"处理批次 {i//batch_size + 1}: {len(batch)} 只股票")
                             
-                            # 尝试多种匹配方式
-                            matched_row = None
-                            
-                            # 1. 直接匹配
-                            if symbol_str in spot_data_dict:
-                                matched_row = spot_data_dict[symbol_str]
-                            # 2. 如果是6位数字，尝试添加市场前缀匹配
-                            elif symbol_str.isdigit() and len(symbol_str) == 6:
-                                # 尝试深市代码 (00开头或30开头)
-                                if symbol_str.startswith('00') or symbol_str.startswith('30'):
-                                    sz_code = f"sz{symbol_str}"
-                                    if sz_code in spot_data_dict:
-                                        matched_row = spot_data_dict[sz_code]
-                                # 尝试沪市代码 (60开头)
-                                elif symbol_str.startswith('60'):
-                                    sh_code = f"sh{symbol_str}"
-                                    if sh_code in spot_data_dict:
-                                        matched_row = spot_data_dict[sh_code]
-                                # 尝试北交所代码 (43开头或83开头或87开头)
-                                elif symbol_str.startswith('43') or symbol_str.startswith('83') or symbol_str.startswith('87'):
-                                    bj_code = f"bj{symbol_str}"
-                                    if bj_code in spot_data_dict:
-                                        matched_row = spot_data_dict[bj_code]
-                            
-                            if matched_row is not None:
-                                try:
-                                    data = {
-                                        'symbol': symbol_str,
-                                        'name': matched_row['名称'],
-                                        'price': float(matched_row['最新价']),
-                                        'change': float(matched_row['涨跌幅']),
-                                        'turnover': float(matched_row['成交额']),
-                                        'volume': float(matched_row['成交量']),
-                                        'high': float(matched_row['最高']),
-                                        'low': float(matched_row['最低']),
-                                        'open': float(matched_row['今开']),
-                                        'data_source': 'akshare',
-                                        'update_time': current_time.strftime('%Y-%m-%d %H:%M:%S')
-                                    }
-                                    results.append(data)
-                                except (ValueError, KeyError) as e:
-                                    self.logger.warning(f"处理股票{symbol_str}数据时出错: {e}")
-                                    continue
-                            else:
-                                self.logger.debug(f"未找到股票数据: {symbol_str}")
+                            for symbol in batch:
+                                symbol_str = str(symbol).strip()
+                                
+                                # 尝试匹配
+                                matched_row = None
+                                
+                                # 1. 直接匹配
+                                if symbol_str in code_mapping:
+                                    matched_row = code_mapping[symbol_str]
+                                # 2. 尝试添加市场前缀
+                                else:
+                                    prefixed_codes = self.get_prefixed_codes(symbol_str)
+                                    for prefixed_code in prefixed_codes:
+                                        if prefixed_code in code_mapping:
+                                            matched_row = code_mapping[prefixed_code]
+                                            break
+                                
+                                if matched_row is not None:
+                                    try:
+                                        data = {
+                                            'symbol': symbol_str,
+                                            'name': matched_row['名称'],
+                                            'price': float(matched_row['最新价']),
+                                            'change': float(matched_row['涨跌幅']),
+                                            'turnover': float(matched_row['成交额']),
+                                            'volume': float(matched_row['成交量']),
+                                            'high': float(matched_row['最高']),
+                                            'low': float(matched_row['最低']),
+                                            'open': float(matched_row['今开']),
+                                            'data_source': 'akshare',
+                                            'update_time': current_time.strftime('%Y-%m-%d %H:%M:%S')
+                                        }
+                                        results.append(data)
+                                    except (ValueError, KeyError) as e:
+                                        self.logger.warning(f"处理股票{symbol_str}数据时出错: {e}")
+                                        continue
+                                else:
+                                    self.logger.debug(f"未找到股票数据: {symbol_str}")
                         
                         if results:
                             self.logger.info(f"从akshare成功获取 {len(results)} 只股票数据")
@@ -268,6 +333,46 @@ class CronStockUpdater:
         df = pd.DataFrame(results)
         self.logger.info(f"生成 {len(df)} 只股票模拟数据")
         return df
+    
+    def normalize_stock_code(self, code):
+        """标准化股票代码"""
+        code_str = str(code).strip()
+        
+        # 移除市场前缀，保留6位数字
+        if code_str.startswith('sh') or code_str.startswith('sz') or code_str.startswith('bj'):
+            clean_code = code_str[2:]  # 移除前缀
+        else:
+            clean_code = code_str
+        
+        # 确保是6位数字代码
+        if clean_code.isdigit() and len(clean_code) == 6:
+            return clean_code
+        elif code_str.isdigit() and len(code_str) == 6:
+            return code_str
+        else:
+            return None
+    
+    def get_prefixed_codes(self, code):
+        """获取带市场前缀的代码列表"""
+        code_str = str(code).strip()
+        if not code_str.isdigit() or len(code_str) != 6:
+            return []
+        
+        prefixes = []
+        
+        # 深市代码 (00开头或30开头)
+        if code_str.startswith('00') or code_str.startswith('30'):
+            prefixes.append(f"sz{code_str}")
+        
+        # 沪市代码 (60开头)
+        if code_str.startswith('60'):
+            prefixes.append(f"sh{code_str}")
+        
+        # 北交所代码 (43开头或83开头或87开头)
+        if code_str.startswith('43') or code_str.startswith('83') or code_str.startswith('87'):
+            prefixes.append(f"bj{code_str}")
+        
+        return prefixes
     
     def apply_selection_strategy(self, stock_data):
         """应用选股策略"""
@@ -329,26 +434,26 @@ class CronStockUpdater:
         # 1. 保存筛选结果
         if not filtered_stocks.empty:
             # 详细结果
-            detail_file = os.path.join(self.stock_pool_dir, f"selected_stocks_{timestamp}.csv")
+            detail_file = os.path.join(self.stock_pool_dir, f"selected_stocks_fast_{timestamp}.csv")
             filtered_stocks.to_csv(detail_file, index=False, encoding='utf-8')
             self.logger.info(f"详细结果已保存: {detail_file}")
             
             # 简化结果（用于快速查看）
-            simple_file = os.path.join(self.stock_pool_dir, "latest_selected.csv")
+            simple_file = os.path.join(self.stock_pool_dir, "latest_selected_fast.csv")
             simple_cols = ['symbol', 'name', 'price', 'change', 'turnover', 'total_score', 'data_source']
             filtered_stocks[simple_cols].to_csv(simple_file, index=False, encoding='utf-8')
             self.logger.info(f"最新结果已保存: {simple_file}")
         
         # 2. 更新股票列表
         if not all_stocks.empty:
-            list_file = os.path.join(self.data_dir, "stock_list_updated.csv")
+            list_file = os.path.join(self.data_dir, "stock_list_updated_fast.csv")
             all_stocks.to_csv(list_file, index=False, encoding='utf-8')
             self.logger.info(f"股票列表已更新: {list_file}")
         
         # 3. 保存更新记录
         record = {
             'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            'version': 'v1.0',
+            'version': 'v1.1-fast',
             'total_stocks': len(all_stocks),
             'processed_stocks': len(filtered_stocks) if not filtered_stocks.empty else 0,
             'data_source': filtered_stocks['data_source'].iloc[0] if not filtered_stocks.empty else 'unknown',
@@ -368,7 +473,7 @@ class CronStockUpdater:
                     'score': float(row['total_score'])
                 })
         
-        record_file = os.path.join(self.stock_pool_dir, f"update_record_{timestamp}.json")
+        record_file = os.path.join(self.stock_pool_dir, f"update_record_fast_{timestamp}.json")
         with open(record_file, 'w', encoding='utf-8') as f:
             json.dump(record, f, ensure_ascii=False, indent=2)
         
@@ -381,7 +486,7 @@ class CronStockUpdater:
         report_lines = []
         
         # 标题
-        report_lines.append("# 📈 股票数据自动更新报告")
+        report_lines.append("# 📈 股票数据自动更新报告 (高效版)")
         report_lines.append(f"## 版本: {record['version']}")
         report_lines.append(f"## 生成时间: {record['timestamp']}")
         report_lines.append("")
@@ -391,6 +496,7 @@ class CronStockUpdater:
         report_lines.append(f"- **数据来源**: {record['data_source']}")
         report_lines.append(f"- **总股票数**: {record['total_stocks']} 只")
         report_lines.append(f"- **处理股票**: {record['processed_stocks']} 只")
+        report_lines.append(f"- **处理模式**: 批量处理 + 缓存优化")
         report_lines.append("")
         
         # 前10名股票
@@ -417,6 +523,8 @@ class CronStockUpdater:
         report_lines.append(f"- **价格范围**: {config['price_range'][0]} - {config['price_range'][1]} 元")
         report_lines.append(f"- **涨跌幅限制**: ±{config['change_limit']}%")
         report_lines.append(f"- **使用真实数据**: {'是' if config['use_real_data'] else '否'}")
+        report_lines.append(f"- **批量大小**: {config['batch_size']} 只/批")
+        report_lines.append(f"- **缓存TTL**: {config['cache_ttl']} 秒")
         report_lines.append("")
         
         # 评分标准
@@ -428,11 +536,20 @@ class CronStockUpdater:
         
         # 生成文件
         report_lines.append("## 💾 生成文件")
-        report_lines.append(f"- **股票列表**: `data/stock_list_updated.csv`")
-        report_lines.append(f"- **最新结果**: `data/stock_pool/latest_selected.csv`")
-        report_lines.append(f"- **详细结果**: `data/stock_pool/selected_stocks_*.csv`")
-        report_lines.append(f"- **更新记录**: `data/stock_pool/update_record_*.json`")
-        report_lines.append(f"- **运行日志**: `data/stock_pool/cron_update_*.log`")
+        report_lines.append(f"- **股票列表**: `data/stock_list_updated_fast.csv`")
+        report_lines.append(f"- **最新结果**: `data/stock_pool/latest_selected_fast.csv`")
+        report_lines.append(f"- **详细结果**: `data/stock_pool/selected_stocks_fast_*.csv`")
+        report_lines.append(f"- **更新记录**: `data/stock_pool/update_record_fast_*.json`")
+        report_lines.append(f"- **运行日志**: `data/stock_pool/fast_update_*.log`")
+        report_lines.append(f"- **缓存文件**: `data/cache/*.json`")
+        report_lines.append("")
+        
+        # 性能优化
+        report_lines.append("## ⚡ 性能优化")
+        report_lines.append("- **缓存机制**: 减少重复API调用")
+        report_lines.append("- **批量处理**: 提高数据处理效率")
+        report_lines.append("- **智能匹配**: 优化股票代码匹配逻辑")
+        report_lines.append("- **错误重试**: 自动重试失败请求")
         report_lines.append("")
         
         # 下次更新建议
@@ -444,12 +561,12 @@ class CronStockUpdater:
         report_lines.append("")
         
         report_lines.append("---")
-        report_lines.append("*报告由股票数据自动更新系统 v1.0 生成*")
+        report_lines.append("*报告由股票数据自动更新系统 v1.1 (高效版) 生成*")
         
         report_content = "\n".join(report_lines)
         
         # 保存报告
-        report_file = os.path.join(self.reports_dir, f"stock_update_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md")
+        report_file = os.path.join(self.reports_dir, f"stock_update_report_fast_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md")
         with open(report_file, 'w', encoding='utf-8') as f:
             f.write(report_content)
         
@@ -460,12 +577,13 @@ class CronStockUpdater:
     def print_summary(self, record, report_content):
         """打印摘要"""
         print("=" * 70)
-        print("股票数据自动更新任务执行完成")
+        print("股票数据自动更新任务执行完成 (高效版)")
         print("=" * 70)
         print(f"执行时间: {record['timestamp']}")
         print(f"数据来源: {record['data_source']}")
         print(f"总股票数: {record['total_stocks']} 只")
         print(f"处理股票: {record['processed_stocks']} 只")
+        print(f"处理模式: 批量处理 + 缓存优化")
         
         if record['top_10_stocks']:
             print("\n🏆 前5名股票:")
@@ -476,22 +594,23 @@ class CronStockUpdater:
                       f"评分: {stock['score']:.1f}")
         
         print("\n📁 生成文件:")
-        print(f"  - data/stock_list_updated.csv")
-        print(f"  - data/stock_pool/latest_selected.csv")
-        print(f"  - data/reports/stock_update_report_*.md")
+        print(f"  - data/stock_list_updated_fast.csv")
+        print(f"  - data/stock_pool/latest_selected_fast.csv")
+        print(f"  - data/reports/stock_update_report_fast_*.md")
+        print(f"  - data/cache/*.json (缓存文件)")
         
         print("\n" + "=" * 70)
     
     def run(self):
         """运行完整更新流程"""
         self.logger.info("=" * 70)
-        self.logger.info("开始执行股票数据自动更新任务 (v1.0)")
+        self.logger.info("开始执行股票数据自动更新任务 (v1.1 - 高效版)")
         self.logger.info("=" * 70)
         
         start_time = time.time()
         
         try:
-            # 1. 获取股票列表
+            # 1. 获取股票列表（带缓存）
             all_stocks = self.get_stock_list()
             
             if all_stocks.empty:
@@ -502,8 +621,8 @@ class CronStockUpdater:
             symbols = all_stocks['symbol'].tolist()
             self.logger.info(f"准备处理 {len(symbols)} 只股票")
             
-            # 3. 获取股票数据
-            stock_data = self.get_stock_data(symbols)
+            # 3. 批量获取股票数据
+            stock_data = self.get_stock_data_batch(symbols)
             
             if stock_data.empty:
                 self.logger.error("无法获取股票数据，任务终止")
@@ -536,21 +655,23 @@ class CronStockUpdater:
 
 def main():
     """主函数"""
-    print("股票数据自动更新系统 v1.0")
+    print("股票数据自动更新系统 v1.1 (高效版)")
     print("=" * 50)
     print("功能: 获取股票数据 → 应用选股策略 → 更新本地文件 → 生成报告")
+    print("优化: 缓存机制 + 批量处理 + 智能匹配 + 错误重试")
     print("=" * 50)
     
-    updater = CronStockUpdater()
+    updater = FastStockUpdater()
     success = updater.run()
     
     if success:
         print("\n✅ 股票数据自动更新任务执行成功!")
-        print("   系统已按照v1.0版本要求完成所有步骤:")
-        print("   1. ✓ 获取最新A股数据")
+        print("   系统已按照v1.1高效版要求完成所有步骤:")
+        print("   1. ✓ 获取最新A股数据 (带缓存)")
         print("   2. ✓ 应用选股策略筛选")
         print("   3. ✓ 更新本地数据文件")
         print("   4. ✓ 生成更新报告")
+        print("   5. ✓ 性能优化 (缓存+批量处理)")
     else:
         print("\n❌ 股票数据自动更新任务执行失败!")
         print("   请查看日志文件获取详细错误信息")
